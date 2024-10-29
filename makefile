@@ -1,0 +1,58 @@
+CC = gcc
+WINDRES = windres
+
+SRC_DIR = src
+BUILD_DIR = build
+INCLUDE_DIR = src/include
+LIB_DIR = src/lib
+PUBLIC_DIR = public
+
+CFLAGS = -I$(INCLUDE_DIR) -L$(LIB_DIR) -Wall -Wextra -O2
+
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+RES = $(BUILD_DIR)/resource.o
+
+TARGET = $(BUILD_DIR)/main.exe
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS) $(RES)
+	@echo Linking object files to create the executable: $(TARGET) 
+	$(CC) -o $(TARGET) $(OBJS) $(RES) -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image
+	@echo \n\nExecutable created at: $(TARGET)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(RES): $(SRC_DIR)/resource.rc
+	$(WINDRES) --include-dir $(INCLUDE_DIR) $< -O coff -o $@
+
+build: $(TARGET)
+	cls
+	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+	@echo Copying public files to build directory...
+	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
+	@echo Cleaning up old object files...
+	del /Q $(BUILD_DIR)\*.o
+	@echo Build completed. Executable created at: $(TARGET)
+
+dev: $(TARGET)
+	cls
+	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+	@echo Copying public files to build directory...
+	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
+	@echo Build completed. Executable created at: $(TARGET)
+
+clean:
+	@echo Cleaning up build directory...
+	del /Q $(BUILD_DIR)\*.*
+	for /d %%p in ($(BUILD_DIR)\*) do rmdir /s /q "%%p"
+	@echo Build directory cleaned.
+
+clean-build:
+	@echo Cleaning up build directory...
+	del /Q $(BUILD_DIR)\*.o
+	@echo Build directory cleaned.
+
+.PHONY: all clean dev build
