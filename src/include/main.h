@@ -56,12 +56,12 @@ extern SDL_Cursor *pointerCursor;
 extern SDL_Cursor *defaultCursor;
 
 extern bool running;
-extern bool menu;
 extern bool showMap;
 extern bool showRays;
 extern bool showState;
 extern bool showTextures;
 extern bool colision;
+extern int menu;
 
 extern Player player;
 extern float rotateSpeed;
@@ -70,5 +70,9 @@ extern float moveSpeed;
 extern int mapWidth;
 extern int mapHeight;
 extern int map[mapSize][mapSize];
+extern int mapWallSize;
+
+extern float fps;
+extern clock_t startTime, previousTime;
 
 #endif

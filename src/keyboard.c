@@ -20,7 +20,7 @@ void keyboardDown(const SDL_Event event) {
                 colision = !colision;
                 break;
             case SDLK_ESCAPE:
-                menu = true;
+                if (menu == 0) menu = 5;
                 break;
             default:
                 break;

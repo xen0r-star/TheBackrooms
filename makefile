@@ -15,7 +15,7 @@ RES = $(BUILD_DIR)/resource.o
 
 TARGET = $(BUILD_DIR)/main.exe
 
-all: $(TARGET)
+all: cls $(TARGET)
 
 $(TARGET): $(OBJS) $(RES)
 	@echo Linking object files to create the executable: $(TARGET) 
@@ -29,7 +29,6 @@ $(RES): $(SRC_DIR)/resource.rc
 	$(WINDRES) --include-dir $(INCLUDE_DIR) $< -O coff -o $@
 
 build: $(TARGET)
-	cls
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@echo Copying public files to build directory...
 	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
@@ -38,7 +37,6 @@ build: $(TARGET)
 	@echo Build completed. Executable created at: $(TARGET)
 
 dev: $(TARGET)
-	cls
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@echo Copying public files to build directory...
 	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y

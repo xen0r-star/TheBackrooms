@@ -19,12 +19,12 @@ SDL_Cursor *pointerCursor = NULL;
 SDL_Cursor *defaultCursor = NULL;
 
 bool running = true;
-bool menu = true;
 bool showMap = false;
 bool showRays = false;
 bool showState = false;
 bool showTextures = true;
 bool colision = true;
+int menu = 1;
 
 Player player = {4.0, 4.0, 0.0};
 float rotateSpeed = 5.0;
@@ -35,7 +35,8 @@ int mapHeight = mapSize;
 int map[mapSize][mapSize];
 int mapWallSize;
 
-double fps;
+float fps;
+clock_t startTime, previousTime;
 
 
 
@@ -59,22 +60,35 @@ int main(int argc, char *argv[]) {
         "Jouer"
     };
 
-    Button settingsButton = {
+    Button achievementsButton = {
         {(SCREEN_WIDTH - 400) / 2, (275 + 1 * (50 + 20)), 400, 50},
         {137, 136, 113, 127},
-        "Paramètres"
+        "Succès"
     };
 
-    Button achievementsButton = {
+    Button settingsButton = {
         {(SCREEN_WIDTH - 400) / 2, (275 + 2 * (50 + 20)), 400, 50},
         {137, 136, 113, 127},
-        "Succès"
+        "Paramètres"
     };
 
     Button exitButton = {
         {(SCREEN_WIDTH - 400) / 2, (275 + 3 * (50 + 20)), 400, 50}, 
         {137, 136, 113, 127},
         "Quitter"
+    };
+
+
+    Button resumeGameButton = {
+        {(SCREEN_WIDTH - 400) / 2, (275 + 0 * (50 + 20)), 400, 50},
+        {137, 136, 113, 127},
+        "Reprendre"
+    };
+
+    Button extiGameButton = {
+        {(SCREEN_WIDTH - 400) / 2, (275 + 3 * (50 + 20)), 400, 50}, 
+        {137, 136, 113, 127},
+        "Quitter et sauvegarder"
     };
 
 
@@ -126,24 +140,30 @@ int main(int argc, char *argv[]) {
     // Boucle principale
     SDL_Event event;
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
-    clock_t startTime = clock(), previousTime = clock();
+    startTime = clock(), previousTime = clock();
     while (running) {
         // Gestion des événements
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                running = 0;
+                running = false;
             } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
-                if (clickedButton(playButton, mouseX, mouseY)) {
-                    menu = false;
-                } else if (clickedButton(settingsButton, mouseX, mouseY)) {
-                    
-                } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
-                    
-                } else if (clickedButton(exitButton, mouseX, mouseY)) {
-                    running = false;
+                if (clickedButton(achievementsButton, mouseX, mouseY))  menu = 3;
+                else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
+
+                if (menu == 1) {
+                    if (clickedButton(playButton, mouseX, mouseY))               menu = 2;
+                    else if (clickedButton(achievementsButton, mouseX, mouseY))  menu = 3;
+                    else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
+                    else if (clickedButton(exitButton, mouseX, mouseY))          running = false;
+
+                } else if (menu == 5) {
+                    if (clickedButton(resumeGameButton, mouseX, mouseY))    menu = 0;
+                    else if (clickedButton(achievementsButton, mouseX, mouseY))  menu = 3;
+                    else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
+                    else if (clickedButton(extiGameButton, mouseX, mouseY))      menu = 1;
                 }
             }
 
@@ -156,139 +176,103 @@ int main(int argc, char *argv[]) {
         SDL_RenderClear(renderer);
 
         bool cursorChanged = false;
-        playButton.color.a = 127;
-        settingsButton.color.a = 127;
-        achievementsButton.color.a = 127;
-        exitButton.color.a = 127;
 
-        if (menu) {
-            SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-
+        if (menu != 0) {
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
 
-            if (clickedButton(playButton, mouseX, mouseY)) {
-                SDL_SetCursor(pointerCursor);
-                cursorChanged = true;
-                playButton.color.a = 225;
-            } else if (clickedButton(settingsButton, mouseX, mouseY)) {
-                SDL_SetCursor(pointerCursor);
-                cursorChanged = true;
-                settingsButton.color.a = 225;
-            } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
-                SDL_SetCursor(pointerCursor);
-                cursorChanged = true;
-                achievementsButton.color.a = 225;
-            } else if (clickedButton(exitButton, mouseX, mouseY)) {
-                SDL_SetCursor(pointerCursor);
-                cursorChanged = true;
-                exitButton.color.a = 225;
+            if (menu == 1) {
+                playButton.color.a = 127;
+                achievementsButton.color.a = 127;
+                settingsButton.color.a = 127;
+                exitButton.color.a = 127;
+
+                SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+
+                if (clickedButton(playButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    playButton.color.a = 225;
+                } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    achievementsButton.color.a = 225;
+                } else if (clickedButton(settingsButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    settingsButton.color.a = 225;
+                } else if (clickedButton(exitButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    exitButton.color.a = 225;
+                }
+
+                drawButton(renderer, playButton);
+                drawButton(renderer, achievementsButton);
+                drawButton(renderer, settingsButton);
+                drawButton(renderer, exitButton);
+            } else if (menu == 2) { // Jouer
+                menu = 0;
+                
+            } else if (menu == 3) { // Succès
+                
+            } else if (menu == 4) { // Paramètres
+                
+            } else if (menu == 5) { // Pause
+                resumeGameButton.color.a = 127;
+                achievementsButton.color.a = 127;
+                settingsButton.color.a = 127;
+                extiGameButton.color.a = 127;
+
+                SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
+                SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);
+
+                SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 190);
+                SDL_Rect block = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+                SDL_RenderFillRect(renderer, &block);
+
+                if (clickedButton(resumeGameButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    resumeGameButton.color.a = 225;
+                } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    achievementsButton.color.a = 225;
+                } else if (clickedButton(settingsButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    settingsButton.color.a = 225;
+                } else if (clickedButton(extiGameButton, mouseX, mouseY)) {
+                    SDL_SetCursor(pointerCursor);
+                    cursorChanged = true;
+                    extiGameButton.color.a = 225;
+                }
+
+                drawButton(renderer, resumeGameButton);
+                drawButton(renderer, achievementsButton);
+                drawButton(renderer, settingsButton);
+                drawButton(renderer, extiGameButton);
             }
 
-            drawButton(renderer, playButton);
-            drawButton(renderer, settingsButton);
-            drawButton(renderer, achievementsButton);
-            drawButton(renderer, exitButton);
         } else {
             // Calcul du FPS
             fps = (double) (clock() - startTime) / CLOCKS_PER_SEC;
+            startTime = clock();
 
             moveSpeed = 5. * fps;
             rotateSpeed = 225. * fps;
-
             fps = (int)(1. / fps);
 
-            startTime = clock();
 
 
-            // Gérer les mouvements du joueur
             keyboardInput(keystate);
 
-
-            // Rendu de la scène
             renderScene();
 
-
-            // Affichage du FPS
-            if (showState) {
-                SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 190);
-                SDL_Rect block = {10, 10, SCREEN_WIDTH / 3 - 10, SCREEN_HEIGHT / 2 - 10};
-                SDL_RenderFillRect(renderer, &block);
-
-                char fpsText[25], text[25];
-                if ((startTime - previousTime) * 1000 / CLOCKS_PER_SEC >= 500) {
-                    previousTime = clock();
-                    sprintf(fpsText, "FPS: %.0f", fps);
-                }
-                
-                renderText(30, 30, 100, 25, fpsText, (SDL_Color){255, 255, 255, 255});
-
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                SDL_Rect wallRect = {30, 70, SCREEN_WIDTH / 3 - 60, 2};
-                SDL_RenderFillRect(renderer, &wallRect);
-
-                sprintf(text, "Colision: %1d", colision);
-                renderText(30, 80, 100, 25, text, (SDL_Color){255, 255, 255, 255});
-
-                sprintf(text, "Texture: %1d", showTextures);
-                renderText(30, 110, 92, 25, text, (SDL_Color){255, 255, 255, 255});
-
-                sprintf(text, "Map: %1d", showMap);
-                renderText(30, 140, 62, 25, text, (SDL_Color){255, 255, 255, 255});
-
-                sprintf(text, "Rays map: %1d", showRays);
-                renderText(30, 170, 100, 25, text, (SDL_Color){255, 255, 255, 255});
-            }
-
-
-            // Affichage de la map
-            if(showMap) {
-                for (int y = 0; y < mapHeight; y++) {
-                    for (int x = 0; x < mapWidth; x++) {
-                        switch (map[y][x]) {
-                            case 1:
-                                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                                break;
-                            case 2:
-                                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-                                break;
-                            case 3:
-                                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-                                break;
-                            case 4:
-                                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-                                break;
-                            case 5:
-                                SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-                                break;
-                            default:
-                                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                                break;
-                        }
-
-                        SDL_Rect block = {SCREEN_WIDTH - (20 + x * mapWallSize), y * mapWallSize + 10, mapWallSize, mapWallSize};
-                        SDL_RenderFillRect(renderer, &block);
-                    }
-                }
-
-                int triangleSize = mapWallSize / 1.5;
-                float angleRad = (player.angle) * M_PI / 180.0;
-                int x1 = SCREEN_WIDTH - (20 + player.x * mapWallSize) + mapWallSize;
-                int y1 = player.y * mapWallSize + 10;
-                int x2 = x1 + cos(angleRad) * triangleSize;
-                int y2 = y1 + sin(angleRad) * triangleSize;
-                int x3 = x1 + cos(angleRad + 2.0 * M_PI / 3.0) * triangleSize;
-                int y3 = y1 + sin(angleRad + 2.0 * M_PI / 3.0) * triangleSize;
-                int x4 = x1 + cos(angleRad - 2.0 * M_PI / 3.0) * triangleSize;
-                int y4 = y1 + sin(angleRad - 2.0 * M_PI / 3.0) * triangleSize;
-
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-                SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
-                SDL_RenderDrawLine(renderer, x2, y2, x3, y3);
-                SDL_RenderDrawLine(renderer, x3, y3, x4, y4);
-                SDL_RenderDrawLine(renderer, x4, y4, x1, y1);
-            }
+            if (showState) showStateInterface();
+            if(showMap) showMapInterface();
         }
 
         if (!cursorChanged) {
