@@ -14,6 +14,9 @@ jobs:
     - name: 📥 Checkout repository
       uses: actions/checkout@v2
 
+    - name: 🛠️ Set up C compiler
+      run: sudo apt-get install build-essential libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+
     - name: 📂 Create build directory
       run: mkdir -p build
 
@@ -54,6 +57,9 @@ jobs:
     - name: 📥 Checkout repository
       uses: actions/checkout@v2
 
+    - name: 🛠️ Set up SDL2
+      run: brew install sdl2 sdl2_ttf sdl2_image
+
     - name: 📂 Create build directory
       run: mkdir -p build
 
@@ -82,6 +88,13 @@ jobs:
     steps:
     - name: 📥 Checkout repository
       uses: actions/checkout@v2
+
+    - name: 🛠️ Set up MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_image
+        path-type: inherit
 
     - name: 📂 Create build directory
       run: mkdir build
