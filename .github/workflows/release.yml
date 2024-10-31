@@ -1,4 +1,4 @@
-name: 🚀 Create Release
+name: 🚀 Build and Release
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       run: mkdir -p build
 
     - name: 🔨 Build project
-      run: make build
+      run: make -f Makefile.unix build
 
     - name: ✏️ Rename build directory
       run: mv build TheBackrooms
@@ -64,7 +64,7 @@ jobs:
       run: mkdir -p build
 
     - name: 🔨 Build project
-      run: make build
+      run: make -f Makefile.unix build
 
     - name: ✏️ Rename build directory
       run: mv build TheBackrooms
@@ -93,14 +93,14 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         update: true
-        install: mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_image
+        install: mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-binutils
         path-type: inherit
 
     - name: 📂 Create build directory
       run: mkdir build
 
     - name: 🔨 Build project
-      run: make build
+      run: make -f Makefile.windows build
 
     - name: ✏️ Rename build directory
       run: mv build TheBackrooms
