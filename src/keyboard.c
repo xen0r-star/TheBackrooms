@@ -5,10 +5,6 @@ void keyboardDown(const SDL_Event event) {
         switch (event.key.keysym.sym) {
             case SDLK_m:
                 showMap = !showMap;
-                if (!showMap) showRays = false;
-                break;
-            case SDLK_r:
-                if(showMap) showRays = !showRays;
                 break;
             case SDLK_f:
                 showState = !showState;

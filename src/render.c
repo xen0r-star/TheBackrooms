@@ -28,6 +28,12 @@ void renderTexturedWall(int x, float rayAngle, float distance, int wallType, int
         Uint8 b = ((pixel >> 8 ) & 0xFF) / (wallSide == 1 ? 2 : 1);
         Uint8 a = pixel & 0xFF;
 
+        float fogFactor = fmin(distance / 60.0, 0.5);
+
+        r = (Uint8)((1 - fogFactor) * r + fogFactor * 170);
+        g = (Uint8)((1 - fogFactor) * g + fogFactor * 170);
+        b = (Uint8)((1 - fogFactor) * b + fogFactor * 170);
+
         screenBuffers[y * SCREEN_WIDTH + x] = (a << 24) | (r << 16) | (g << 8) | b;
     }
 }
@@ -66,27 +72,15 @@ void renderTexturedFloor(int y, float floorX, float floorY, float floorStepX, fl
     }
 }
 
-void renderColoredWall(int x, int wallType, int wallSide, int wallHeight, int drawStart) {
+void renderColoredWall(int x, float distance, int wallType, int wallSide, int wallHeight, int drawStart) {
     Color color;
     switch (wallType) {
-        case 1:
-            color = (Color){219, 177, 82, 255};
-            break;
-        case 2:
-            color = (Color){219, 177, 82, 255};
-            break;
-        case 3:
-            color = (Color){0, 255, 0, 255};
-            break;
-        case 4:
-            color = (Color){0, 0, 255, 255};
-            break;
-        case 5:
-            color = (Color){255, 0, 255, 255};
-            break;
-        default:
-            color = (Color){0, 0, 0, 255};
-            break;
+        case 1: color = (Color){184, 181,  55, 255}; break;
+        case 2: color = (Color){184, 181,  55, 255}; break;
+        case 3: color = (Color){  0, 255,   0, 255}; break;
+        case 4: color = (Color){  0,   0, 255, 255}; break;
+        case 5: color = (Color){255,   0, 255, 255}; break;
+        default:color = (Color){  0,   0,   0, 255}; break;
     }
 
     if (wallSide == 1) {
@@ -95,24 +89,22 @@ void renderColoredWall(int x, int wallType, int wallSide, int wallHeight, int dr
         color.b /=2;
     }
 
+    float fogFactor = fmin(distance / 60.0, 0.5);
+
+    color.r = (1 - fogFactor) * color.r + fogFactor * 170;
+    color.g = (1 - fogFactor) * color.g + fogFactor * 170;
+    color.b = (1 - fogFactor) * color.b + fogFactor * 170;
+
     // Dessiner le mur
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    SDL_Rect wallRect = {x, drawStart, 1, wallHeight};
-    SDL_RenderFillRect(renderer, &wallRect);
-
-
-    int halfWallHeight = (SCREEN_HEIGHT - wallHeight) / 2;
-    int wallRectDownHeight = SCREEN_HEIGHT - (halfWallHeight + wallHeight);
-
-    // Dessiner le plafond
-    SDL_SetRenderDrawColor(renderer, 162, 125, 55, 255);
-    SDL_Rect wallRectUp = {x, 0, 1, halfWallHeight};
-    SDL_RenderFillRect(renderer, &wallRectUp);
-
-    // Dessiner le sol
-    SDL_SetRenderDrawColor(renderer, 182, 145, 75, 255);
-    SDL_Rect wallRectDown = {x, halfWallHeight + wallHeight, 1, wallRectDownHeight};
-    SDL_RenderFillRect(renderer, &wallRectDown);
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        if (y < drawStart) {
+            screenBuffers[y * SCREEN_WIDTH + x] = 0xFF474112;
+        } else if (y > drawStart + wallHeight) {
+            screenBuffers[y * SCREEN_WIDTH + x] = 0xFF524B1C;
+        } else {
+            screenBuffers[y * SCREEN_WIDTH + x] = (color.a << 24) | (color.r << 16) | (color.g << 8) | color.b;
+        }
+    }
 }
 
 
@@ -162,9 +154,6 @@ void renderScene() {
 
             renderTexturedWall(x, rayAngle, distance, wallType, wallSide, wallHeight, drawStart, drawEnd);
         }
-
-        SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
-        SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);
     } else {
         for (int x = 0; x < SCREEN_WIDTH; x++) {
             float rayAngle = ((player.angle - (FOV / 2.0)) + ((float)x / (float)SCREEN_WIDTH) * FOV) * (M_PI / 180); // Angle du rayon
@@ -180,7 +169,10 @@ void renderScene() {
             if (drawStart < 0) drawStart = 0;                         
             if (drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
 
-            renderColoredWall(x, wallType, wallSide, wallHeight, drawStart);
+            renderColoredWall(x, distance, wallType, wallSide, wallHeight, drawStart);
         }
     }
+
+    SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
+    SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);
 }

@@ -20,7 +20,6 @@ SDL_Cursor *defaultCursor = NULL;
 
 bool running = true;
 bool showMap = false;
-bool showRays = false;
 bool showState = false;
 bool showTextures = true;
 bool colision = true;
@@ -33,7 +32,6 @@ float moveSpeed = 0.1;
 int mapWidth = mapSize;
 int mapHeight = mapSize;
 int map[mapSize][mapSize];
-int mapWallSize;
 
 float fps;
 clock_t startTime, previousTime;
@@ -94,7 +92,6 @@ int main(int argc, char *argv[]) {
 
     // création de la map
     generateMap(map, mapSize, mapSize, 5);
-    mapWallSize = (SCREEN_HEIGHT * 0.4) / mapHeight;
 
 
     // Chargement textures
@@ -146,7 +143,7 @@ int main(int argc, char *argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
-            } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+            } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && menu != 0) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
