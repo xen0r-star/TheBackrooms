@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-release:
+  build-and-release-linux:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,7 @@ jobs:
       run: mv build TheBackrooms
 
     - name: 📦 Zip the directory
-      run: zip -r TheBackrooms.zip TheBackrooms
+      run: zip -r TheBackrooms-linux.zip TheBackrooms
 
     - name: 📝 Create Release
       id: create_release
@@ -43,6 +43,64 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./TheBackrooms.zip
-        asset_name: TheBackrooms.zip
+        asset_path: ./TheBackrooms-linux.zip
+        asset_name: TheBackrooms-linux.zip
+        asset_content_type: application/zip
+
+  build-and-release-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v2
+
+    - name: 📂 Create build directory
+      run: mkdir -p build
+
+    - name: 🔨 Build project
+      run: make build
+
+    - name: ✏️ Rename build directory
+      run: mv build TheBackrooms
+
+    - name: 📦 Zip the directory
+      run: zip -r TheBackrooms-macos.zip TheBackrooms
+
+    - name: 📤 Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./TheBackrooms-macos.zip
+        asset_name: TheBackrooms-macos.zip
+        asset_content_type: application/zip
+
+  build-and-release-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v2
+
+    - name: 📂 Create build directory
+      run: mkdir build
+
+    - name: 🔨 Build project
+      run: make build
+
+    - name: ✏️ Rename build directory
+      run: mv build TheBackrooms
+
+    - name: 📦 Zip the directory
+      run: powershell Compress-Archive -Path TheBackrooms -DestinationPath TheBackrooms-windows.zip
+
+    - name: 📤 Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./TheBackrooms-windows.zip
+        asset_name: TheBackrooms-windows.zip
         asset_content_type: application/zip
