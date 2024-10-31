@@ -3,8 +3,8 @@ WINDRES = windres
 
 SRC_DIR = src
 BUILD_DIR = build
-INCLUDE_DIR = src/include
-LIB_DIR = src/lib
+INCLUDE_DIR = ./src/include
+LIB_DIR = ./src/lib
 PUBLIC_DIR = public
 
 CFLAGS = -I$(INCLUDE_DIR) -L$(LIB_DIR) -Wall -Wextra -O2
