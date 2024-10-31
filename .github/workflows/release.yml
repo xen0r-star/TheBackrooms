@@ -14,8 +14,8 @@ jobs:
     - name: 📥 Checkout repository
       uses: actions/checkout@v2
 
-    - name: 🛠️ Set up C compiler
-      run: sudo apt-get install build-essential
+    - name: 📂 Create build directory
+      run: mkdir -p build
 
     - name: 🔨 Build project
       run: make build
