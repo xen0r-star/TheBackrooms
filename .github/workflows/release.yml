@@ -1,0 +1,48 @@
+name: 🚀 Create Release
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v2
+
+    - name: 🛠️ Set up C compiler
+      run: sudo apt-get install build-essential
+
+    - name: 🔨 Build project
+      run: make build
+
+    - name: ✏️ Rename build directory
+      run: mv build TheBackrooms
+
+    - name: 📦 Zip the directory
+      run: zip -r TheBackrooms.zip TheBackrooms
+
+    - name: 📝 Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: 📤 Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./TheBackrooms.zip
+        asset_name: TheBackrooms.zip
+        asset_content_type: application/zip
