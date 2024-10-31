@@ -1,6 +1,6 @@
-#include "window.h"
+#include "initialization.h"
 
-int createWindow() {
+int initialization() {
     // Initialisation de SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -48,16 +48,38 @@ int createWindow() {
         return 1;
     }
 
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    keystate = SDL_GetKeyboardState(NULL);
+    
+    if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+    } else {
+        for (int i = 0; i < SDL_NumJoysticks(); i++) {
+            if (SDL_IsGameController(i)) {
+                controller = SDL_GameControllerOpen(i);
+            }
+        }
+
+        if (controller == NULL) {
+            printf("Could not open gamecontroller! SDL_Error: %s\n", SDL_GetError());
+        }
+    }
+
     return 0;
 }
 
-int closeWindow() {
+int close() {
     // Libérer la mémoire pour chaque texture
     for (int i = 0; i < numberTextures; i++) {
         free(textureBuffers[i]);
     }
 
     free(textureBuffers);
+
+    if (controller != NULL) {
+        SDL_GameControllerClose(controller);
+        controller = NULL;
+    }
 
 
     // Nettoyage de SDL

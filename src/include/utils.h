@@ -10,7 +10,9 @@ extern int renderText(int x, int y, int w, int h, const char *text, SDL_Color co
 extern void drawButton(SDL_Renderer *renderer, Button button);
 extern bool clickedButton(Button button, int mouseX, int mouseY);
 
-void showStateInterface();
-void showMapInterface();
+extern void showStateInterface();
+extern void showMapInterface();
+
+extern void itemFrame(int selectFrame);
 
 #endif

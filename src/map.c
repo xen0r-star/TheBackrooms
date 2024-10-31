@@ -1,44 +1,5 @@
 #include "map.h"
 
-int readMap(const char *filename, int ***map, int *mapWidth, int *mapHeight) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        return -1;
-    }
-
-    if (fscanf(file, "MAP_WIDTH %d\n", mapWidth) != 1) {
-        fclose(file);
-        perror("Error reading map width");
-        return -1;
-    }
-
-    if (fscanf(file, "MAP_HEIGHT %d\n", mapHeight) != 1) {
-        fclose(file);
-        perror("Error reading map height");
-        return -1;
-    }
-
-    *map = (int **)malloc(*mapHeight * sizeof(int *));
-    for (int i = 0; i < *mapHeight; i++) {
-        (*map)[i] = (int *)malloc(*mapWidth * sizeof(int));
-    }
-
-    for (int i = 0; i < *mapHeight; i++) {
-        for (int j = 0; j < *mapWidth; j++) {
-            if (fscanf(file, "%d", &(*map)[i][j]) != 1) {
-                fclose(file);
-                perror("Error reading map data");
-                return -1;
-            }
-        }
-    }
-
-    fclose(file);
-    return 0;
-}
-
-
 void generateMap(int map[mapSize][mapSize], int MAP_WIDTH, int MAP_HEIGHT, int percentObstacles) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {

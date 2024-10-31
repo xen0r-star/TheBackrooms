@@ -49,10 +49,14 @@ int castRay(float angle, float *distance, int *wallType, int *wallSide) {
             if (side == 0) *distance = (sideDistX - deltaDistX);
             else           *distance = (sideDistY - deltaDistY);
 
+            mapDiscovered[mapY][mapX] = 1;
+
             *wallType = map[mapY][mapX];
             *wallSide = side;
 
             return 0;
+        } else {
+            mapDiscovered[mapY][mapX] = 1;
         }
     }
 }

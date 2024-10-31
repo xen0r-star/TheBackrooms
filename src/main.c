@@ -1,14 +1,17 @@
 #include "main.h"
-#include "window.h"
-#include "keyboard.h"
+#include "initialization.h"
+#include "handle.h"
 #include "render.h"
 #include "map.h"
+#include "data.h"
 #include "utils.h"
 
 
 
 SDL_Renderer *renderer = NULL;
 SDL_Window *window = NULL;
+Uint8 *keystate = NULL;
+SDL_GameController *controller = NULL;
 TTF_Font *font = NULL;
 SDL_Texture *message = NULL;
 Uint32 *screenBuffers;
@@ -26,12 +29,17 @@ bool colision = true;
 int menu = 1;
 
 Player player = {4.0, 4.0, 0.0};
-float rotateSpeed = 5.0;
-float moveSpeed = 0.1;
+float rotateSpeed = 150.0;
+float moveSpeed = 3.0;
+float sensitivity = 0.2;
+int selectFrame = 1;
+
+float playerRotateSpeed, playerMoveSpeed;
 
 int mapWidth = mapSize;
 int mapHeight = mapSize;
 int map[mapSize][mapSize];
+int mapDiscovered[mapSize][mapSize];
 
 float fps;
 clock_t startTime, previousTime;
@@ -43,7 +51,7 @@ int main(int argc, char *argv[]) {
     (void)argv;
 
     // Initialisation de la fenêtre
-    createWindow();
+    initialization();
 
 
     SDL_Cursor *pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
@@ -92,6 +100,11 @@ int main(int argc, char *argv[]) {
 
     // création de la map
     generateMap(map, mapSize, mapSize, 5);
+    for (int y = 0; y < mapSize; y++) {
+        for (int x = 0; x < mapSize; x++) {
+            mapDiscovered[y][x] = 0;
+        }
+    }
 
 
     // Chargement textures
@@ -136,7 +149,6 @@ int main(int argc, char *argv[]) {
 
     // Boucle principale
     SDL_Event event;
-    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
     startTime = clock(), previousTime = clock();
     while (running) {
         // Gestion des événements
@@ -151,20 +163,33 @@ int main(int argc, char *argv[]) {
                 else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
 
                 if (menu == 1) {
-                    if (clickedButton(playButton, mouseX, mouseY))               menu = 2;
-                    else if (clickedButton(achievementsButton, mouseX, mouseY))  menu = 3;
-                    else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
-                    else if (clickedButton(exitButton, mouseX, mouseY))          running = false;
-
+                    if (clickedButton(playButton, mouseX, mouseY)) {
+                        menu = 2;
+                    } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
+                        menu = 3;
+                    } else if (clickedButton(settingsButton, mouseX, mouseY)) {
+                        menu = 4;
+                    } else if (clickedButton(exitButton, mouseX, mouseY)) {
+                        running = false;
+                    }
                 } else if (menu == 5) {
-                    if (clickedButton(resumeGameButton, mouseX, mouseY))    menu = 0;
-                    else if (clickedButton(achievementsButton, mouseX, mouseY))  menu = 3;
-                    else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
-                    else if (clickedButton(extiGameButton, mouseX, mouseY))      menu = 1;
+                    if (clickedButton(resumeGameButton, mouseX, mouseY)) {
+                        menu = 0;
+                    } else if (clickedButton(achievementsButton, mouseX, mouseY)) { 
+                        menu = 3;
+                    } else if (clickedButton(settingsButton, mouseX, mouseY)) {     
+                        menu = 4;
+                    } else if (clickedButton(extiGameButton, mouseX, mouseY)) {
+                        menu = 1;
+                        saveData("Save1");
+                    }
                 }
             }
 
+            mouseMotion(event);
             keyboardDown(event);
+
+            if (controller != NULL) controllerDown(event);
         }
 
 
@@ -175,6 +200,8 @@ int main(int argc, char *argv[]) {
         bool cursorChanged = false;
 
         if (menu != 0) {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -254,19 +281,22 @@ int main(int argc, char *argv[]) {
             }
 
         } else {
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+
             // Calcul du FPS
             fps = (double) (clock() - startTime) / CLOCKS_PER_SEC;
             startTime = clock();
 
-            moveSpeed = 5. * fps;
-            rotateSpeed = 225. * fps;
+            playerMoveSpeed = moveSpeed * fps;
+            playerRotateSpeed = rotateSpeed * fps;
             fps = (int)(1. / fps);
 
 
-
-            keyboardInput(keystate);
+            keyboardInput();
+            if (controller != NULL) controllerInput();
 
             renderScene();
+            itemFrame(selectFrame);
 
             if (showState) showStateInterface();
             if(showMap) showMapInterface();
@@ -282,6 +312,6 @@ int main(int argc, char *argv[]) {
 
 
     // Fermeture de la fenêtre
-    closeWindow();
+    close();
     return 0;
 }

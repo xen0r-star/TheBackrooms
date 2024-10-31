@@ -116,22 +116,24 @@ void showMapInterface() {
         float deformation = 1.0 + y * increment;
 
         for (int x = 0; x < mapWidth; x++) {
-            switch (map[y][x]) {
-                case 1: SDL_SetRenderDrawColor(renderer,  92,  70,  37, 255); break;
-                case 2: SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
-                case 3: SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
-                case 4: SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
-                case 5: SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
-                default:SDL_SetRenderDrawColor(renderer, 160, 125,  72, 255); break;
-            }
+            if (mapDiscovered[y][x] == 1) {
+                switch (map[y][x]) {
+                    case 1:  SDL_SetRenderDrawColor(renderer,  92,  70,  37, 255); break;
+                    case 2:  SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
+                    case 3:  SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
+                    case 4:  SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
+                    case 5:  SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
+                    default: SDL_SetRenderDrawColor(renderer, 160, 125,  72, 255); break;
+                }
 
-            SDL_Rect block = {
-                ((SCREEN_WIDTH - drawSize * deformation * mapWidth) / 2) + x * drawSize * deformation,  // X
-                (SCREEN_HEIGHT - drawSize * mapHeight - 35) + y * drawSize,                             // Y
-                drawSize * deformation + 1,                                                             // W
-                drawSize                                                                                // H
-            };
-            SDL_RenderFillRect(renderer, &block);
+                SDL_Rect block = {
+                    ((SCREEN_WIDTH - drawSize * deformation * mapWidth) / 2) + x * drawSize * deformation,  // X
+                    (SCREEN_HEIGHT - drawSize * mapHeight - 35) + y * drawSize,                             // Y
+                    drawSize * deformation + 1,                                                             // W
+                    drawSize                                                                                // H
+                };
+                SDL_RenderFillRect(renderer, &block);
+            }
         }
     }
 
@@ -144,4 +146,56 @@ void showMapInterface() {
         4, 4 
     };
     SDL_RenderFillRect(renderer, &playerRect);
+}
+
+
+
+void itemFrame(int selectFrame) {
+    SDL_Surface *frameSurface = IMG_Load("textures/frame.png");
+    if (!frameSurface) {
+        printf("Erreur lors du chargement de l'image : %s\n", IMG_GetError());
+        return;
+    }
+
+    SDL_Texture *frameTexture = SDL_CreateTextureFromSurface(renderer, frameSurface);
+    SDL_FreeSurface(frameSurface);
+    if (!frameTexture) {
+        printf("Erreur lors de la création de la texture : %s\n", SDL_GetError());
+        return;
+    }
+
+
+    SDL_Surface *frameSelectSurface = IMG_Load("textures/frameSelect.png");
+    if (!frameSelectSurface) {
+        printf("Erreur lors du chargement de l'image : %s\n", IMG_GetError());
+        return;
+    }
+
+    SDL_Texture *frameSelectTexture = SDL_CreateTextureFromSurface(renderer, frameSelectSurface);
+    SDL_FreeSurface(frameSelectSurface);
+    if (!frameSelectTexture) {
+        printf("Erreur lors de la création de la texture : %s\n", SDL_GetError());
+        return;
+    }
+
+
+    for (int i = 0; i < 10; i++) {
+        SDL_Rect destRect = { 
+            ((SCREEN_WIDTH - 10 * 50) / 2) + i * 50, 
+            SCREEN_HEIGHT - 50 - 10, 
+            50, 
+            50 
+        };
+
+        printf("Frame: %d\n", selectFrame);
+
+        if (i + 1 == selectFrame) {
+            SDL_RenderCopy(renderer, frameSelectTexture, NULL, &destRect);
+        } else {
+            SDL_RenderCopy(renderer, frameTexture, NULL, &destRect);
+        }
+    }
+
+    SDL_DestroyTexture(frameTexture);
+    SDL_DestroyTexture(frameSelectTexture);
 }

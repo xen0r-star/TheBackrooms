@@ -13,7 +13,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 RES = $(BUILD_DIR)/resource.o
 
-TARGET = $(BUILD_DIR)/main
+TARGET = $(BUILD_DIR)/TheBackrooms
 
 all: $(TARGET)
 

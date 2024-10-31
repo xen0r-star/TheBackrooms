@@ -46,6 +46,8 @@ typedef struct{
 // Variables globales
 extern SDL_Renderer *renderer;
 extern SDL_Window *window;
+extern Uint8 *keystate;
+extern SDL_GameController *controller;
 extern TTF_Font *font;
 extern SDL_Texture *message;
 extern Uint32 *screenBuffers;
@@ -65,10 +67,16 @@ extern int menu;
 extern Player player;
 extern float rotateSpeed;
 extern float moveSpeed;
+extern float sensitivity;
+extern int selectFrame;
+
+extern float playerRotateSpeed;
+extern float playerMoveSpeed;
 
 extern int mapWidth;
 extern int mapHeight;
 extern int map[mapSize][mapSize];
+extern int mapDiscovered[mapSize][mapSize];
 
 extern float fps;
 extern clock_t startTime, previousTime;
