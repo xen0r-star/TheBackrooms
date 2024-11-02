@@ -31,6 +31,8 @@ int initialization() {
         SDL_Quit();
         return 1;
     }
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 
     SDL_Surface *iconSurface = IMG_Load(iconFile);
@@ -86,7 +88,6 @@ int close() {
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyTexture(message);
     TTF_CloseFont(font);
-    SDL_FreeCursor(pointerCursor);
     
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

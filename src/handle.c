@@ -1,4 +1,6 @@
 #include "handle.h"
+#include "menu.h"
+#include "data.h"
 
 void keyboardDown(const SDL_Event event) {
     if (event.type == SDL_KEYDOWN) {
@@ -16,7 +18,7 @@ void keyboardDown(const SDL_Event event) {
                 colision = !colision;
                 break;
             case SDLK_ESCAPE:
-                if (menu == 0) menu = 5;
+                if (displayMenu == 0) displayMenu = 5;
                 break;
             default:
                 break;
@@ -105,16 +107,47 @@ void keyboardInput() {
 }
 
 
-void mouseMotion(const SDL_Event event) {
-    if (event.type == SDL_MOUSEMOTION) {
+void mouseHandle(const SDL_Event event) {
+    if (event.type == SDL_MOUSEMOTION && displayMenu == 0) {
         int mouseX = event.motion.xrel;
 
         player.angle += mouseX * sensitivity;
         if (player.angle < 0) player.angle += 360;
         if (player.angle >= 360) player.angle -= 360;
     } else if (event.type == SDL_MOUSEWHEEL) {
-        if (event.wheel.y > 0 && selectFrame > 1)     selectFrame -= 1;
+        if (event.wheel.y > 0 && selectFrame > 1)       selectFrame -= 1;
         else if (event.wheel.y < 0 && selectFrame < 10) selectFrame += 1;
+    }
+
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && displayMenu != 0) {
+        int mouseX = event.button.x;
+        int mouseY = event.button.y;
+
+        if (clickedButton(achievementsButton, mouseX, mouseY))       displayMenu = 3;
+        else if (clickedButton(settingsButton, mouseX, mouseY))      displayMenu = 4;
+
+        if (displayMenu == 1) {
+            if (clickedButton(playButton, mouseX, mouseY)) {
+                displayMenu = 2;
+            } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
+                displayMenu = 3;
+            } else if (clickedButton(settingsButton, mouseX, mouseY)) {
+                displayMenu = 4;
+            } else if (clickedButton(exitButton, mouseX, mouseY)) {
+                running = false;
+            }
+        } else if (displayMenu == 5) {
+            if (clickedButton(resumeGameButton, mouseX, mouseY)) {
+                displayMenu = 0;
+            } else if (clickedButton(achievementsButton, mouseX, mouseY)) { 
+                displayMenu = 3;
+            } else if (clickedButton(settingsButton, mouseX, mouseY)) {     
+                displayMenu = 4;
+            } else if (clickedButton(extiGameButton, mouseX, mouseY)) {
+                displayMenu = 1;
+                saveData("Save1");
+            }
+        }
     }
 }
 
@@ -123,17 +156,22 @@ void mouseMotion(const SDL_Event event) {
 void controllerDown(const SDL_Event event) {
     if (event.type == SDL_CONTROLLERBUTTONDOWN) {
         switch (event.cbutton.button) {
-            case SDL_CONTROLLER_BUTTON_Y:
-                showMap = !showMap;
+            case SDL_CONTROLLER_BUTTON_Y:     
+                showMap = !showMap; 
                 break;
-            case SDL_CONTROLLER_BUTTON_BACK:
-                showTextures = !showTextures;
+            case SDL_CONTROLLER_BUTTON_BACK:  
+                showTextures = !showTextures; 
                 break;
-            case SDL_CONTROLLER_BUTTON_START:
-                showState = !showState;
+            case SDL_CONTROLLER_BUTTON_START: 
+                showState = !showState; 
                 break;
-            default:
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+                if (displayMenu == 0 && selectFrame < 10) selectFrame += 1;
                 break;
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+                if (displayMenu == 0 && selectFrame > 1) selectFrame -= 1;
+                break;
+            default: break;
         }
     }
 

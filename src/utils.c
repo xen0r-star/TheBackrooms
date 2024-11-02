@@ -1,19 +1,6 @@
 #include "utils.h"
 #include "render.h"
 
-SDL_Texture *loadTexture(SDL_Renderer *renderer, const char *filename) {
-    SDL_Surface *surface = IMG_Load(filename);
-    if (!surface) {
-        printf("Failed to load texture: %s\n", IMG_GetError());
-        return NULL;
-    }
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-    return texture;
-}
-
-
-
 int renderText(int x, int y, int w, int h, const char *text, SDL_Color color) {
     SDL_Surface *surfaceMessage = TTF_RenderUTF8_Blended(font, text, color);
     if (!surfaceMessage) {
@@ -40,28 +27,8 @@ int renderText(int x, int y, int w, int h, const char *text, SDL_Color color) {
 }
 
 
-void drawButton(SDL_Renderer *renderer, Button button) {
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(renderer, button.color.r, button.color.g, button.color.b, button.color.a);
-    SDL_RenderFillRect(renderer, &button.rect);
-
-    renderText(
-        button.rect.x + (button.rect.w - (int) (strlen(button.text) * 10)) / 2, 
-        button.rect.y + (button.rect.h - (int) (button.rect.h * .75)) / 2, 
-        (int) (strlen(button.text) * 10), 
-        (int) (button.rect.h * .75),
-        button.text, (SDL_Color){0, 0, 0, 255}
-    );
-}
-
-bool clickedButton(Button button, int mouseX, int mouseY) {
-    return SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &button.rect);
-}
-
-
 
 void showStateInterface() {
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 190);
     SDL_Rect block = {10, 10, SCREEN_WIDTH / 3 - 10, SCREEN_HEIGHT / 2 - 10};
     SDL_RenderFillRect(renderer, &block);
@@ -88,6 +55,8 @@ void showStateInterface() {
     sprintf(text, "Map: %1d", showMap);
     renderText(30, 140, 62, 25, text, (SDL_Color){255, 255, 255, 255});
 }
+
+
 
 void showMapInterface() {
     int drawSize = (SCREEN_HEIGHT * 0.4) / mapHeight;
@@ -179,15 +148,13 @@ void itemFrame(int selectFrame) {
     }
 
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 5; i++) {
         SDL_Rect destRect = { 
-            ((SCREEN_WIDTH - 10 * 50) / 2) + i * 50, 
+            ((SCREEN_WIDTH - 5 * 50) / 2) + i * 50, 
             SCREEN_HEIGHT - 50 - 10, 
             50, 
             50 
         };
-
-        printf("Frame: %d\n", selectFrame);
 
         if (i + 1 == selectFrame) {
             SDL_RenderCopy(renderer, frameSelectTexture, NULL, &destRect);

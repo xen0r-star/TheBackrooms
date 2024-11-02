@@ -4,13 +4,14 @@
 #include "render.h"
 #include "map.h"
 #include "data.h"
+#include "menu.h"
 #include "utils.h"
 
 
 
 SDL_Renderer *renderer = NULL;
 SDL_Window *window = NULL;
-Uint8 *keystate = NULL;
+const Uint8 *keystate;
 SDL_GameController *controller = NULL;
 TTF_Font *font = NULL;
 SDL_Texture *message = NULL;
@@ -18,15 +19,20 @@ Uint32 *screenBuffers;
 SDL_Texture* screenBuffersTexture;
 Uint32 **textureBuffers;
 SDL_Texture *backgroundTexture = NULL;
-SDL_Cursor *pointerCursor = NULL;
-SDL_Cursor *defaultCursor = NULL;
+
+Button playButton;
+Button achievementsButton;
+Button settingsButton;
+Button exitButton;
+Button resumeGameButton;
+Button extiGameButton;
 
 bool running = true;
 bool showMap = false;
 bool showState = false;
 bool showTextures = true;
 bool colision = true;
-int menu = 1;
+int displayMenu = 1;
 
 Player player = {4.0, 4.0, 0.0};
 float rotateSpeed = 150.0;
@@ -53,45 +59,41 @@ int main(int argc, char *argv[]) {
     // Initialisation de la fenêtre
     initialization();
 
-
-    SDL_Cursor *pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
-    SDL_Cursor *defaultCursor = SDL_GetDefaultCursor();
-
     backgroundTexture = IMG_LoadTexture(renderer, backgroundFile);
 
     // Création menu
-    Button playButton = {
+    playButton = (Button){
         {(SCREEN_WIDTH - 400) / 2, (275 + 0 * (50 + 20)), 400, 50},
         {137, 136, 113, 127},
         "Jouer"
     };
 
-    Button achievementsButton = {
+    achievementsButton = (Button){
         {(SCREEN_WIDTH - 400) / 2, (275 + 1 * (50 + 20)), 400, 50},
         {137, 136, 113, 127},
         "Succès"
     };
 
-    Button settingsButton = {
+    settingsButton = (Button){
         {(SCREEN_WIDTH - 400) / 2, (275 + 2 * (50 + 20)), 400, 50},
         {137, 136, 113, 127},
         "Paramètres"
     };
 
-    Button exitButton = {
+    exitButton = (Button){
         {(SCREEN_WIDTH - 400) / 2, (275 + 3 * (50 + 20)), 400, 50}, 
         {137, 136, 113, 127},
         "Quitter"
     };
 
 
-    Button resumeGameButton = {
+    resumeGameButton = (Button){
         {(SCREEN_WIDTH - 400) / 2, (275 + 0 * (50 + 20)), 400, 50},
         {137, 136, 113, 127},
         "Reprendre"
     };
 
-    Button extiGameButton = {
+    extiGameButton = (Button){
         {(SCREEN_WIDTH - 400) / 2, (275 + 3 * (50 + 20)), 400, 50}, 
         {137, 136, 113, 127},
         "Quitter et sauvegarder"
@@ -155,38 +157,9 @@ int main(int argc, char *argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
-            } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && menu != 0) {
-                int mouseX = event.button.x;
-                int mouseY = event.button.y;
-
-                if (clickedButton(achievementsButton, mouseX, mouseY))  menu = 3;
-                else if (clickedButton(settingsButton, mouseX, mouseY))      menu = 4;
-
-                if (menu == 1) {
-                    if (clickedButton(playButton, mouseX, mouseY)) {
-                        menu = 2;
-                    } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
-                        menu = 3;
-                    } else if (clickedButton(settingsButton, mouseX, mouseY)) {
-                        menu = 4;
-                    } else if (clickedButton(exitButton, mouseX, mouseY)) {
-                        running = false;
-                    }
-                } else if (menu == 5) {
-                    if (clickedButton(resumeGameButton, mouseX, mouseY)) {
-                        menu = 0;
-                    } else if (clickedButton(achievementsButton, mouseX, mouseY)) { 
-                        menu = 3;
-                    } else if (clickedButton(settingsButton, mouseX, mouseY)) {     
-                        menu = 4;
-                    } else if (clickedButton(extiGameButton, mouseX, mouseY)) {
-                        menu = 1;
-                        saveData("Save1");
-                    }
-                }
             }
 
-            mouseMotion(event);
+            mouseHandle(event);
             keyboardDown(event);
 
             if (controller != NULL) controllerDown(event);
@@ -197,87 +170,64 @@ int main(int argc, char *argv[]) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        bool cursorChanged = false;
 
-        if (menu != 0) {
+        if (displayMenu != 0) {
             SDL_SetRelativeMouseMode(SDL_FALSE);
 
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
 
-            if (menu == 1) {
-                playButton.color.a = 127;
-                achievementsButton.color.a = 127;
-                settingsButton.color.a = 127;
-                exitButton.color.a = 127;
-
+            if (displayMenu == 1) {
+                SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+                menu(mouseX, mouseY, 4, playButton, achievementsButton, settingsButton, exitButton);
+            } else if (displayMenu == 2) { // Jouer
+                displayMenu = 0;
+                
+            } else if (displayMenu == 3) { // Succès
                 SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
-                if (clickedButton(playButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    playButton.color.a = 225;
-                } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    achievementsButton.color.a = 225;
-                } else if (clickedButton(settingsButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    settingsButton.color.a = 225;
-                } else if (clickedButton(exitButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    exitButton.color.a = 225;
+                int scrollOffset = 0;
+                const int scrollSpeed = 20;
+                const int successCount = 10;
+                const int contentHeight = successCount * 125 + (successCount - 1) * 20;
+                const int viewHeight = SCREEN_HEIGHT - 50;
+
+
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 225);
+                for (int i = 0; i < successCount; i++) {
+                    SDL_Rect block = {
+                        50, 
+                        50 + 125 * i + 20 * i - scrollOffset, 
+                        SCREEN_WIDTH - 100 - 15, 
+                        125
+                    };
+                    SDL_RenderFillRect(renderer, &block);
                 }
 
-                drawButton(renderer, playButton);
-                drawButton(renderer, achievementsButton);
-                drawButton(renderer, settingsButton);
-                drawButton(renderer, exitButton);
-            } else if (menu == 2) { // Jouer
-                menu = 0;
-                
-            } else if (menu == 3) { // Succès
-                
-            } else if (menu == 4) { // Paramètres
-                
-            } else if (menu == 5) { // Pause
-                resumeGameButton.color.a = 127;
-                achievementsButton.color.a = 127;
-                settingsButton.color.a = 127;
-                extiGameButton.color.a = 127;
+                SDL_SetRenderDrawColor(renderer, 200, 200, 200, 240);
+                SDL_Rect scrollbar = {SCREEN_WIDTH - 30, 50, 10, viewHeight - 10};
+                SDL_RenderFillRect(renderer, &scrollbar);
 
+                SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+                scrollbar = (SDL_Rect){
+                    SCREEN_WIDTH - 30, 
+                    50 + ((scrollOffset * viewHeight) / contentHeight), 
+                    10, 
+                    (viewHeight * viewHeight) / contentHeight
+                };
+                SDL_RenderFillRect(renderer, &scrollbar);
+
+            } else if (displayMenu == 4) { // Paramètres
+                
+            } else if (displayMenu == 5) { // Pause
                 SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
                 SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);
 
-                SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 190);
                 SDL_Rect block = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
                 SDL_RenderFillRect(renderer, &block);
 
-                if (clickedButton(resumeGameButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    resumeGameButton.color.a = 225;
-                } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    achievementsButton.color.a = 225;
-                } else if (clickedButton(settingsButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    settingsButton.color.a = 225;
-                } else if (clickedButton(extiGameButton, mouseX, mouseY)) {
-                    SDL_SetCursor(pointerCursor);
-                    cursorChanged = true;
-                    extiGameButton.color.a = 225;
-                }
-
-                drawButton(renderer, resumeGameButton);
-                drawButton(renderer, achievementsButton);
-                drawButton(renderer, settingsButton);
-                drawButton(renderer, extiGameButton);
+                menu(mouseX, mouseY, 4, resumeGameButton, achievementsButton, settingsButton, extiGameButton);
             }
 
         } else {
@@ -300,10 +250,6 @@ int main(int argc, char *argv[]) {
 
             if (showState) showStateInterface();
             if(showMap) showMapInterface();
-        }
-
-        if (!cursorChanged) {
-            SDL_SetCursor(defaultCursor);
         }
 
         // Mise à jour de l'écran
