@@ -5,6 +5,7 @@
 #include "map.h"
 #include "data.h"
 #include "menu.h"
+#include "texture.h"
 #include "utils.h"
 
 
@@ -59,6 +60,8 @@ int main(int argc, char *argv[]) {
     // Initialisation de la fenêtre
     initialization();
 
+
+
     backgroundTexture = IMG_LoadTexture(renderer, backgroundFile);
 
     // Création menu
@@ -110,43 +113,7 @@ int main(int argc, char *argv[]) {
 
 
     // Chargement textures
-    const char* texturePaths[numberTextures] = {
-        "textures/breadMat.png",
-        "textures/breadMat.png",
-
-        "textures/floor.png",
-        "textures/ceiling.png",
-    };
-
-    textureBuffers = (Uint32**)malloc(numberTextures * sizeof(Uint32*));
-    for (int i = 0; i < numberTextures; i++) {
-        SDL_Surface* surface = IMG_Load(texturePaths[i]);
-        textureBuffers[i] = (Uint32*)malloc(textureSize * textureSize * sizeof(Uint32));
-    
-        for (int y = 0; y < textureSize; y++) {
-            for (int x = 0; x < textureSize; x++) {
-                Uint32 pixel = ((Uint32*)surface->pixels)[y * surface->w + x];
-                pixel = ((pixel & 0xFF)         << 24) // RGBA => ABGR
-                    |   (((pixel >> 8 ) & 0xFF) << 16) 
-                    |   (((pixel >> 16) & 0xFF) << 8 ) 
-                    |   ((pixel  >> 24) & 0xFF);
-                textureBuffers[i][y * textureSize + x] = pixel;
-            }
-        }
-
-        SDL_FreeSurface(surface);
-    }
-
-
-    // Création de la texture de rendu
-    screenBuffersTexture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        SCREEN_WIDTH, SCREEN_HEIGHT
-    );
-
-    screenBuffers = (Uint32 *)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(Uint32));
+    initializationTextures();
 
 
     // Boucle principale
@@ -171,75 +138,12 @@ int main(int argc, char *argv[]) {
         SDL_RenderClear(renderer);
 
 
-        if (displayMenu != 0) {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-
-            int mouseX, mouseY;
-            SDL_GetMouseState(&mouseX, &mouseY);
-
-            if (displayMenu == 1) {
-                SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-                menu(mouseX, mouseY, 4, playButton, achievementsButton, settingsButton, exitButton);
-            } else if (displayMenu == 2) { // Jouer
-                displayMenu = 0;
-                
-            } else if (displayMenu == 3) { // Succès
-                SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-
-                int scrollOffset = 0;
-                const int scrollSpeed = 20;
-                const int successCount = 10;
-                const int contentHeight = successCount * 125 + (successCount - 1) * 20;
-                const int viewHeight = SCREEN_HEIGHT - 50;
-
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 225);
-                for (int i = 0; i < successCount; i++) {
-                    SDL_Rect block = {
-                        50, 
-                        50 + 125 * i + 20 * i - scrollOffset, 
-                        SCREEN_WIDTH - 100 - 15, 
-                        125
-                    };
-                    SDL_RenderFillRect(renderer, &block);
-                }
-
-                SDL_SetRenderDrawColor(renderer, 200, 200, 200, 240);
-                SDL_Rect scrollbar = {SCREEN_WIDTH - 30, 50, 10, viewHeight - 10};
-                SDL_RenderFillRect(renderer, &scrollbar);
-
-                SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
-                scrollbar = (SDL_Rect){
-                    SCREEN_WIDTH - 30, 
-                    50 + ((scrollOffset * viewHeight) / contentHeight), 
-                    10, 
-                    (viewHeight * viewHeight) / contentHeight
-                };
-                SDL_RenderFillRect(renderer, &scrollbar);
-
-            } else if (displayMenu == 4) { // Paramètres
-                
-            } else if (displayMenu == 5) { // Pause
-                SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
-                SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 190);
-                SDL_Rect block = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-                SDL_RenderFillRect(renderer, &block);
-
-                menu(mouseX, mouseY, 4, resumeGameButton, achievementsButton, settingsButton, extiGameButton);
-            }
-
-        } else {
+        if (displayMenu != 0) menu();
+        else {
             SDL_SetRelativeMouseMode(SDL_TRUE);
 
             // Calcul du FPS
-            fps = (double) (clock() - startTime) / CLOCKS_PER_SEC;
-            startTime = clock();
-
-            playerMoveSpeed = moveSpeed * fps;
-            playerRotateSpeed = rotateSpeed * fps;
-            fps = (int)(1. / fps);
+            calculateFPS();
 
 
             keyboardInput();

@@ -3,6 +3,8 @@
 
 #include "main.h"
 
+extern void calculateFPS();
+
 extern int renderText(int x, int y, int w, int h, const char *text, SDL_Color color);
 
 extern void showStateInterface();

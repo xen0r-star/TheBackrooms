@@ -1,6 +1,17 @@
 #include "utils.h"
 #include "render.h"
 
+
+void calculateFPS() {
+    fps = (double) (clock() - startTime) / CLOCKS_PER_SEC;
+    startTime = clock();
+
+    playerMoveSpeed = moveSpeed * fps;
+    playerRotateSpeed = rotateSpeed * fps;
+    fps = (int)(1. / fps);
+}
+
+
 int renderText(int x, int y, int w, int h, const char *text, SDL_Color color) {
     SDL_Surface *surfaceMessage = TTF_RenderUTF8_Blended(font, text, color);
     if (!surfaceMessage) {
@@ -98,8 +109,8 @@ void showMapInterface() {
                 SDL_Rect block = {
                     ((SCREEN_WIDTH - drawSize * deformation * mapWidth) / 2) + x * drawSize * deformation,  // X
                     (SCREEN_HEIGHT - drawSize * mapHeight - 35) + y * drawSize,                             // Y
-                    drawSize * deformation + 1,                                                             // W
-                    drawSize                                                                                // H
+                    drawSize * deformation + 1,                                                                     // W
+                    drawSize                                                                                        // H
                 };
                 SDL_RenderFillRect(renderer, &block);
             }
