@@ -30,9 +30,9 @@ void renderTexturedWall(int x, float rayAngle, float distance, int wallType, int
 
         float fogFactor = fmin(distance / 60.0, 0.5);
 
-        r = (Uint8)((1 - fogFactor) * r + fogFactor * 170);
-        g = (Uint8)((1 - fogFactor) * g + fogFactor * 170);
-        b = (Uint8)((1 - fogFactor) * b + fogFactor * 170);
+        r = (Uint8)((1 - fogFactor) * r + fogFactor * 0);
+        g = (Uint8)((1 - fogFactor) * g + fogFactor * 0);
+        b = (Uint8)((1 - fogFactor) * b + fogFactor * 0);
 
         screenBuffers[y * SCREEN_WIDTH + x] = (a << 24) | (r << 16) | (g << 8) | b;
     }
@@ -109,6 +109,64 @@ void renderColoredWall(int x, float distance, int wallType, int wallSide, int wa
 
 
 
+void glitchEffect(int speed) {
+    srand(clock() / (1000 / speed));
+
+    // 1. Lignes de balayage (scan lines)
+    for (int y = 0; y < SCREEN_HEIGHT; y += 2) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            int index = y * SCREEN_WIDTH + x;
+            screenBuffers[index] = (50 << 24) | (0 << 16) | (0 << 8) | 0;
+        }
+    }
+
+    // 2. Distorsions de ligne aléatoires
+    for (int y = 0; y < SCREEN_HEIGHT; y += 15) { // Bandes de 15 pixels de hauteur
+        int shift = (rand() % 10) - 5; // Décalage aléatoire entre -5 et +5 pixels
+
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            int index = y * SCREEN_WIDTH + x;
+            int shiftedX = x + shift;
+
+            if (shiftedX >= 0 && shiftedX < SCREEN_WIDTH) {
+                screenBuffers[index] = screenBuffers[y * SCREEN_WIDTH + shiftedX];
+            }
+        }
+    }
+
+    // 3. Bruit de couleur (artefacts)
+    // for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT / 50; i++) { // Quelques pixels aléatoires
+    //     int randomX = rand() % SCREEN_WIDTH;
+    //     int randomY = rand() % SCREEN_HEIGHT;
+    //     int index = randomY * SCREEN_WIDTH + randomX;
+        
+    //     Uint8 r = rand() % 256;
+    //     Uint8 g = rand() % 256;
+    //     Uint8 b = rand() % 256;
+    //     screenBuffers[index] = (255 << 24) | (r << 16) | (g << 8) | b;
+    // }
+
+    // 4. Déformation de couleur
+    // for (int y = 0; y < SCREEN_HEIGHT; y++) {
+    //     for (int x = 0; x < SCREEN_WIDTH; x++) {
+    //         int index = y * SCREEN_WIDTH + x;
+
+    //         Uint8 r = (screenBuffers[index] >> 16) & 0xFF;
+    //         Uint8 g = (screenBuffers[index] >> 8) & 0xFF;
+    //         Uint8 b = screenBuffers[index] & 0xFF;
+
+    //         int redX = x + 1;  // Décalage de rouge vers la droite
+    //         int blueX = x - 1; // Décalage de bleu vers la gauche
+
+    //         //  ? redX : blueX;
+    //         if (rand() % 18 == 3 && redX < SCREEN_WIDTH) {
+    //             screenBuffers[y * SCREEN_WIDTH + redX] = (255 << 24) | (r << 16) | (0 << 8) | 0;
+    //         } else if (rand() % 18 == 6 && blueX >= 0) {
+    //             screenBuffers[y * SCREEN_WIDTH + blueX] |= (255 << 24) | (0 << 16) | (0 << 8) | 70;
+    //         }
+    //     }
+    // }
+}
 
 
 // renderScene: Fonction pour dessiner la scène
@@ -172,6 +230,8 @@ void renderScene() {
             renderColoredWall(x, distance, wallType, wallSide, wallHeight, drawStart);
         }
     }
+
+    // glitchEffect(1);
 
     SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
     SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);

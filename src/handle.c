@@ -123,9 +123,6 @@ void mouseHandle(const SDL_Event event) {
         int mouseX = event.button.x;
         int mouseY = event.button.y;
 
-        if (clickedButton(achievementsButton, mouseX, mouseY))       displayMenu = 3;
-        else if (clickedButton(settingsButton, mouseX, mouseY))      displayMenu = 4;
-
         if (displayMenu == 1) {
             if (clickedButton(playButton, mouseX, mouseY)) {
                 displayMenu = 2;

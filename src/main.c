@@ -2,7 +2,6 @@
 #include "initialization.h"
 #include "handle.h"
 #include "render.h"
-#include "map.h"
 #include "data.h"
 #include "menu.h"
 #include "texture.h"
@@ -101,16 +100,6 @@ int main(int argc, char *argv[]) {
         {137, 136, 113, 127},
         "Quitter et sauvegarder"
     };
-
-
-    // création de la map
-    generateMap(map, mapSize, mapSize, 5);
-    for (int y = 0; y < mapSize; y++) {
-        for (int x = 0; x < mapSize; x++) {
-            mapDiscovered[y][x] = 0;
-        }
-    }
-
 
     // Chargement textures
     initializationTextures();

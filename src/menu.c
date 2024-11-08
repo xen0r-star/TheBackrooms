@@ -1,4 +1,5 @@
 #include "menu.h"
+#include "map.h"
 #include "utils.h"
 
 
@@ -76,8 +77,60 @@ void menu() {
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
         handleButtons(mouseX, mouseY, 4, playButton, achievementsButton, settingsButton, exitButton);
     } else if (displayMenu == 2) { // Jouer
-        displayMenu = 0;
-        
+        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 225);
+
+        for (int i = 0; i < 3; i++) {
+            SDL_Rect block = {
+                50, 
+                50 + 125 * i + 20 * i, 
+                SCREEN_WIDTH - 100 - 15, 
+                125
+            };
+            SDL_RenderFillRect(renderer, &block);
+        }
+
+        SDL_Rect block = {
+            50, 
+            50 + 125 * (4 - 1) + 20 * (4 - 1), 
+            SCREEN_WIDTH - 100 - 15, 
+            100
+        };
+        SDL_RenderFillRect(renderer, &block);
+
+        FILE *file;
+        file = fopen("./saves/Save1.dat", "r");
+        if (file) {
+            renderText(50 + 10, 50 + 125 * 0 + 20 * 0 + 10, 300, 40, "Sauvegarde 1", (SDL_Color){255, 255, 255, 255});
+            fclose(file);
+        } else {
+            renderText(50 + 10, 50 + 125 * 0 + 20 * 0 + 10, 300, 40, "Sauvegarde 1: Vide", (SDL_Color){255, 255, 255, 255});
+        }
+
+        file = fopen("./saves/Save2.dat", "r");
+        if (file) {
+            renderText(50 + 10, 50 + 125 * 1 + 20 * 1 + 10, 300, 40, "Sauvegarde 2", (SDL_Color){255, 255, 255, 255});
+            fclose(file);
+        } else {
+            renderText(50 + 10, 50 + 125 * 1 + 20 * 1 + 10, 300, 40, "Sauvegarde 2: Vide", (SDL_Color){255, 255, 255, 255});
+        }
+
+        file = fopen("./saves/Save3.dat", "r");
+        if (file) {
+            renderText(50 + 10, 50 + 125 * 2 + 20 * 2 + 10, 300, 40, "Sauvegarde 3", (SDL_Color){255, 255, 255, 255});
+            fclose(file);
+        } else {
+            renderText(50 + 10, 50 + 125 * 2 + 20 * 2 + 10, 300, 40, "Sauvegarde 3: Vide", (SDL_Color){255, 255, 255, 255});
+        }
+
+        generateMap(map, mapSize, mapSize, 5);
+        for (int y = 0; y < mapSize; y++) {
+            for (int x = 0; x < mapSize; x++) {
+                mapDiscovered[y][x] = 0;
+            }
+        }
+
+        // displayMenu = 0;
     } else if (displayMenu == 3) { // Succès
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
