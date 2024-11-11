@@ -36,6 +36,9 @@ jobs:
     - name: clean up build directory
       run: Remove-Item build\*.o -Force
 
+    - name: Run the executable
+      run: build\TheBackrooms.exe
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
