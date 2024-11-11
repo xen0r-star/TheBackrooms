@@ -69,6 +69,6 @@ clearScreen:
 	cls
 
 createBuildDir:
-    @mkdir -p build
+	@mkdir -p build
 
 .PHONY: all clean dev build cleanBuild clearScreen githubBuild createBuildDir
