@@ -33,7 +33,7 @@ $(RES): $(SRC_DIR)/resource.rc
 
 githubBuild: createBuildDir $(TARGET)
 	@echo Copying public files to build directory...
-	xcopy "$(PUBLIC_DIR)" "$(BUILD_DIR)\\*" /E /I /Y
+	xcopy "$(PUBLIC_DIR)" "$(BUILD_DIR)" /E /I /Y
 	@echo Cleaning up old object files...
 	del /Q $(BUILD_DIR)\*.o
 	@echo Build completed. Executable created at: $(TARGET)
@@ -42,7 +42,7 @@ githubBuild: createBuildDir $(TARGET)
 build: clearScreen $(TARGET)
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@echo Copying public files to build directory...
-	xcopy "$(PUBLIC_DIR)" "$(BUILD_DIR)\\*" /E /I /Y
+	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
 	@echo Cleaning up old object files...
 	del /Q $(BUILD_DIR)\*.o
 	@echo Build completed. Executable created at: $(TARGET)
@@ -50,7 +50,7 @@ build: clearScreen $(TARGET)
 dev: clearScreen $(TARGET)
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@echo Copying public files to build directory...
-	xcopy "$(PUBLIC_DIR)" "$(BUILD_DIR)\\*" /E /I /Y
+	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
 	@echo Build completed. Executable created at: $(TARGET)
 
 clean:
