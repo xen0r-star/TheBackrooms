@@ -32,8 +32,8 @@ $(RES): $(SRC_DIR)/resource.rc
 
 
 githubBuild: createBuildDir $(TARGET)
-	@echo Cleaning up old object files...
-	del /Q $(BUILD_DIR)\*.o
+	# @echo Cleaning up old object files...
+	# del /Q $(BUILD_DIR)\*.o
 	@echo Build completed. Executable created at: $(TARGET)
 
 
