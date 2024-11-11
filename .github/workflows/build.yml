@@ -34,7 +34,7 @@ jobs:
       run: xcopy /E /I /Y public\* build\
 
     - name: clean up build directory
-      run: del /Q build\*.o
+      run: Remove-Item build\*.o -Force
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
