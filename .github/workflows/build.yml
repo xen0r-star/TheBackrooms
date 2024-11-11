@@ -18,3 +18,12 @@ jobs:
 
     - name: Build with Makefile.windows
       run: make -f Makefile.windows githubBuild
+
+    - name: copy public folder
+      run: xcopy /E /I /Y public\* build\
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-files
+        path: build/
