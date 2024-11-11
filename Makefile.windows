@@ -31,6 +31,14 @@ $(RES): $(SRC_DIR)/resource.rc
 	$(WINDRES) --include-dir $(INCLUDE_DIR) $< -O coff -o $@
 
 
+githubBuild: $(TARGET)
+	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+	@echo Copying public files to build directory...
+	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
+	@echo Cleaning up old object files...
+	del /Q $(BUILD_DIR)\*.o
+	@echo Build completed. Executable created at: $(TARGET)
+
 
 build: clearScreen $(TARGET)
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
@@ -60,4 +68,4 @@ cleanBuild:
 clearScreen:
 	cls
 
-.PHONY: all clean dev build cleanBuild clearScreen
+.PHONY: all clean dev build cleanBuild clearScreen githubBuild
