@@ -31,7 +31,7 @@ $(RES): $(SRC_DIR)/resource.rc
 	$(WINDRES) --include-dir $(INCLUDE_DIR) $< -O coff -o $@
 
 
-githubBuild: $(TARGET)
+githubBuild: createBuildDir $(TARGET)
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@echo Copying public files to build directory...
 	xcopy $(PUBLIC_DIR) $(BUILD_DIR)\ /E /I /Y
@@ -68,4 +68,7 @@ cleanBuild:
 clearScreen:
 	cls
 
-.PHONY: all clean dev build cleanBuild clearScreen githubBuild
+createBuildDir:
+    mkdir -p build
+
+.PHONY: all clean dev build cleanBuild clearScreen githubBuild createBuildDir
