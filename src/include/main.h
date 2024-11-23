@@ -13,16 +13,16 @@
 
 // Inclusions
 #define WINDOW_TITLE "ESCAPE THE BACKROOMS"   // Titre de la fenêtre
-#define SCREEN_WIDTH 800                // Largeur de la fenêtre
-#define SCREEN_HEIGHT 600               // Hauteur de la fenêtre
+// #define screenWidth 800                // Largeur de la fenêtre
+// #define screenHeight 600               // Hauteur de la fenêtre
 #define FOV 60.0                        // Champ de vision en degrés
-#define textureSize 64                  // Taille des textures
-#define numberTextures 4                // Nombre de textures
-#define mapSize 50                      // Taille de la map
+#define TEXTURE_SIZE 64                  // Taille des textures
+#define NUMBER_TEXTURES 4                // Nombre de textures
+#define MAP_SIZE 50                      // Taille de la map
 
-#define fontFile "font/Roboto-Regular.ttf"
-#define backgroundFile "image/background.png"
-#define iconFile "image/The_Backrooms_logo.png"
+#define FONT_FILE "font/Roboto-Regular.ttf"
+#define BACKGROUND_FILE "image/background.png"
+#define ICON_FILE "image/The_Backrooms_logo.png"
 
 
 // Structure
@@ -44,6 +44,9 @@ typedef struct{
 
 
 // Variables globales
+extern int screenWidth;
+extern int screenHeight;
+
 extern SDL_Renderer *renderer;
 extern SDL_Window *window;
 extern const Uint8 *keystate;
@@ -68,6 +71,10 @@ extern Button settingsButton;
 extern Button exitButton;
 extern Button resumeGameButton;
 extern Button extiGameButton;
+extern Button loadGame1;
+extern Button loadGame2;
+extern Button loadGame3;
+extern Button launchGame;
 
 extern Player player;
 extern float rotateSpeed;
@@ -80,8 +87,10 @@ extern float playerMoveSpeed;
 
 extern int mapWidth;
 extern int mapHeight;
-extern int map[mapSize][mapSize];
-extern int mapDiscovered[mapSize][mapSize];
+extern int map[MAP_SIZE][MAP_SIZE];
+extern int mapDiscovered[MAP_SIZE][MAP_SIZE];
+
+extern int typeLaunchGame[3];
 
 extern float fps;
 extern clock_t startTime, previousTime;

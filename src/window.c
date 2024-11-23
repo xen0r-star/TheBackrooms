@@ -1,6 +1,6 @@
-#include "initialization.h"
+#include "window.h"
 
-int initialization() {
+int initializationWindow() {
     // Initialisation de SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -16,7 +16,7 @@ int initialization() {
     window = SDL_CreateWindow(WINDOW_TITLE,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
+                                          screenWidth, screenHeight, SDL_WINDOW_RESIZABLE);
     if (window == NULL) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
         SDL_Quit();
@@ -35,7 +35,7 @@ int initialization() {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 
-    SDL_Surface *iconSurface = IMG_Load(iconFile);
+    SDL_Surface *iconSurface = IMG_Load(ICON_FILE);
     if (!iconSurface) {
         printf("Erreur lors du chargement de l'icône : %s\n", IMG_GetError());
         return 1;
@@ -44,7 +44,7 @@ int initialization() {
     SDL_SetWindowIcon(window, iconSurface);
     SDL_FreeSurface(iconSurface);
 
-    font = TTF_OpenFont(fontFile, 72);
+    font = TTF_OpenFont(FONT_FILE, 72);
     if (!font) {
         printf("Erreur lors du chargement de la police: %s\n", TTF_GetError());
         return 1;
@@ -70,9 +70,9 @@ int initialization() {
     return 0;
 }
 
-int close() {
+int closeWindow() {
     // Libérer la mémoire pour chaque texture
-    for (int i = 0; i < numberTextures; i++) {
+    for (int i = 0; i < NUMBER_TEXTURES; i++) {
         free(textureBuffers[i]);
     }
 

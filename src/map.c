@@ -1,6 +1,6 @@
 #include "map.h"
 
-void generateMap(int map[mapSize][mapSize], int MAP_WIDTH, int MAP_HEIGHT, int percentObstacles) {
+void generateMap(int map[MAP_SIZE][MAP_SIZE], int MAP_WIDTH, int MAP_HEIGHT, int percentObstacles) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             if (i == 0 || i == MAP_HEIGHT - 1 || j == 0 || j == MAP_WIDTH - 1) {

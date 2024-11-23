@@ -9,20 +9,20 @@ void renderTexturedWall(int x, float rayAngle, float distance, int wallType, int
     wallX -= floor((wallX));
 
 
-    int texX = (int)(wallX * (double)textureSize);
+    int texX = (int)(wallX * (double)TEXTURE_SIZE);
     if (wallSide == 0 && cos(rayAngle) > 0)
-        texX = textureSize - texX - 1;
+        texX = TEXTURE_SIZE - texX - 1;
     if (wallSide == 1 && sin(rayAngle) < 0)
-        texX = textureSize - texX - 1;
+        texX = TEXTURE_SIZE - texX - 1;
 
-    double step = 1.0 * textureSize / wallHeight;
-    double texPos = (drawStart - SCREEN_HEIGHT / 2 + wallHeight / 2) * step;
+    double step = 1.0 * TEXTURE_SIZE / wallHeight;
+    double texPos = (drawStart - screenHeight / 2 + wallHeight / 2) * step;
 
     for (int y = drawStart; y < drawEnd; y++) {
-        int texY = (int)texPos & (textureSize - 1);
+        int texY = (int)texPos & (TEXTURE_SIZE - 1);
         texPos += step;
 
-        Uint32 pixel = textureBuffers[wallType - 1][textureSize * texY + texX];
+        Uint32 pixel = textureBuffers[wallType - 1][TEXTURE_SIZE * texY + texX];
         Uint8 r = ((pixel >> 24) & 0xFF) / (wallSide == 1 ? 2 : 1);
         Uint8 g = ((pixel >> 16) & 0xFF) / (wallSide == 1 ? 2 : 1);
         Uint8 b = ((pixel >> 8 ) & 0xFF) / (wallSide == 1 ? 2 : 1);
@@ -34,17 +34,17 @@ void renderTexturedWall(int x, float rayAngle, float distance, int wallType, int
         g = (Uint8)((1 - fogFactor) * g + fogFactor * 0);
         b = (Uint8)((1 - fogFactor) * b + fogFactor * 0);
 
-        screenBuffers[y * SCREEN_WIDTH + x] = (a << 24) | (r << 16) | (g << 8) | b;
+        screenBuffers[y * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
     }
 }
 
 void renderTexturedFloor(int y, float floorX, float floorY, float floorStepX, float floorStepY) {
-    for (int x = 0; x < SCREEN_WIDTH; ++x) {
+    for (int x = 0; x < screenWidth; ++x) {
         int cellX = (int)(floorX);
         int cellY = (int)(floorY);
 
-        int texX = (int)(textureSize * (floorX - cellX)) & (textureSize - 1);
-        int texY = (int)(textureSize * (floorY - cellY)) & (textureSize - 1);
+        int texX = (int)(TEXTURE_SIZE * (floorX - cellX)) & (TEXTURE_SIZE - 1);
+        int texY = (int)(TEXTURE_SIZE * (floorY - cellY)) & (TEXTURE_SIZE - 1);
 
         floorX += floorStepX;
         floorY += floorStepY;
@@ -53,22 +53,22 @@ void renderTexturedFloor(int y, float floorX, float floorY, float floorStepX, fl
         Uint32 pixel;
         Uint8 r, g, b, a;
 
-        pixel = textureBuffers[numberTextures - 1][textureSize * texY + texX];
+        pixel = textureBuffers[NUMBER_TEXTURES - 1][TEXTURE_SIZE * texY + texX];
         r = ((pixel >> 24) & 0xFF) / 2;
         g = ((pixel >> 16) & 0xFF) / 2;
         b = ((pixel >> 8 ) & 0xFF) / 2;
         a = pixel & 0xFF;
 
-        screenBuffers[y * SCREEN_WIDTH + x] = (a << 24) | (r << 16) | (g << 8) | b;
+        screenBuffers[y * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
 
 
-        pixel = textureBuffers[numberTextures - 2][textureSize * texY + texX];
+        pixel = textureBuffers[NUMBER_TEXTURES - 2][TEXTURE_SIZE * texY + texX];
         r = ((pixel >> 24) & 0xFF) / 2;
         g = ((pixel >> 16) & 0xFF) / 2;
         b = ((pixel >> 8 ) & 0xFF) / 2;
         a = pixel & 0xFF;
 
-        screenBuffers[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = (a << 24) | (r << 16) | (g << 8) | b;
+        screenBuffers[(screenHeight - y - 1) * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
     }
 }
 
@@ -96,13 +96,13 @@ void renderColoredWall(int x, float distance, int wallType, int wallSide, int wa
     color.b = (1 - fogFactor) * color.b + fogFactor * 170;
 
     // Dessiner le mur
-    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+    for (int y = 0; y < screenHeight; y++) {
         if (y < drawStart) {
-            screenBuffers[y * SCREEN_WIDTH + x] = 0xFF474112;
+            screenBuffers[y * screenWidth + x] = 0xFF474112;
         } else if (y > drawStart + wallHeight) {
-            screenBuffers[y * SCREEN_WIDTH + x] = 0xFF524B1C;
+            screenBuffers[y * screenWidth + x] = 0xFF524B1C;
         } else {
-            screenBuffers[y * SCREEN_WIDTH + x] = (color.a << 24) | (color.r << 16) | (color.g << 8) | color.b;
+            screenBuffers[y * screenWidth + x] = (color.a << 24) | (color.r << 16) | (color.g << 8) | color.b;
         }
     }
 }
@@ -113,32 +113,32 @@ void glitchEffect(int speed) {
     srand(clock() / (1000 / speed));
 
     // 1. Lignes de balayage (scan lines)
-    for (int y = 0; y < SCREEN_HEIGHT; y += 2) {
-        for (int x = 0; x < SCREEN_WIDTH; x++) {
-            int index = y * SCREEN_WIDTH + x;
+    for (int y = 0; y < screenHeight; y += 2) {
+        for (int x = 0; x < screenWidth; x++) {
+            int index = y * screenWidth + x;
             screenBuffers[index] = (50 << 24) | (0 << 16) | (0 << 8) | 0;
         }
     }
 
     // 2. Distorsions de ligne aléatoires
-    for (int y = 0; y < SCREEN_HEIGHT; y += 15) { // Bandes de 15 pixels de hauteur
+    for (int y = 0; y < screenHeight; y += 15) { // Bandes de 15 pixels de hauteur
         int shift = (rand() % 10) - 5; // Décalage aléatoire entre -5 et +5 pixels
 
-        for (int x = 0; x < SCREEN_WIDTH; x++) {
-            int index = y * SCREEN_WIDTH + x;
+        for (int x = 0; x < screenWidth; x++) {
+            int index = y * screenWidth + x;
             int shiftedX = x + shift;
 
-            if (shiftedX >= 0 && shiftedX < SCREEN_WIDTH) {
-                screenBuffers[index] = screenBuffers[y * SCREEN_WIDTH + shiftedX];
+            if (shiftedX >= 0 && shiftedX < screenWidth) {
+                screenBuffers[index] = screenBuffers[y * screenWidth + shiftedX];
             }
         }
     }
 
     // 3. Bruit de couleur (artefacts)
-    // for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT / 50; i++) { // Quelques pixels aléatoires
-    //     int randomX = rand() % SCREEN_WIDTH;
-    //     int randomY = rand() % SCREEN_HEIGHT;
-    //     int index = randomY * SCREEN_WIDTH + randomX;
+    // for (int i = 0; i < screenWidth * screenHeight / 50; i++) { // Quelques pixels aléatoires
+    //     int randomX = rand() % screenWidth;
+    //     int randomY = rand() % screenHeight;
+    //     int index = randomY * screenWidth + randomX;
         
     //     Uint8 r = rand() % 256;
     //     Uint8 g = rand() % 256;
@@ -147,9 +147,9 @@ void glitchEffect(int speed) {
     // }
 
     // 4. Déformation de couleur
-    // for (int y = 0; y < SCREEN_HEIGHT; y++) {
-    //     for (int x = 0; x < SCREEN_WIDTH; x++) {
-    //         int index = y * SCREEN_WIDTH + x;
+    // for (int y = 0; y < screenHeight; y++) {
+    //     for (int x = 0; x < screenWidth; x++) {
+    //         int index = y * screenWidth + x;
 
     //         Uint8 r = (screenBuffers[index] >> 16) & 0xFF;
     //         Uint8 g = (screenBuffers[index] >> 8) & 0xFF;
@@ -159,10 +159,10 @@ void glitchEffect(int speed) {
     //         int blueX = x - 1; // Décalage de bleu vers la gauche
 
     //         //  ? redX : blueX;
-    //         if (rand() % 18 == 3 && redX < SCREEN_WIDTH) {
-    //             screenBuffers[y * SCREEN_WIDTH + redX] = (255 << 24) | (r << 16) | (0 << 8) | 0;
+    //         if (rand() % 18 == 3 && redX < screenWidth) {
+    //             screenBuffers[y * screenWidth + redX] = (255 << 24) | (r << 16) | (0 << 8) | 0;
     //         } else if (rand() % 18 == 6 && blueX >= 0) {
-    //             screenBuffers[y * SCREEN_WIDTH + blueX] |= (255 << 24) | (0 << 16) | (0 << 8) | 70;
+    //             screenBuffers[y * screenWidth + blueX] |= (255 << 24) | (0 << 16) | (0 << 8) | 70;
     //         }
     //     }
     // }
@@ -173,7 +173,7 @@ void glitchEffect(int speed) {
 void renderScene() {
     // Dessin des colonnes de murs
     if (showTextures) {
-        for (int y = SCREEN_HEIGHT / 2 + 1; y < SCREEN_HEIGHT; y++) { // sol et plafond
+        for (int y = screenHeight / 2 + 1; y < screenHeight; y++) { // sol et plafond
             float angleRadians0 = (player.angle - (FOV / 2.0)) * (M_PI / 180.0);
             float angleRadians1 = (player.angle + (FOV / 2.0)) * (M_PI / 180.0);
 
@@ -183,12 +183,12 @@ void renderScene() {
             float rayDirY1 = sin(angleRadians1);
 
 
-            int p = y - SCREEN_HEIGHT / 2;
-            float posZ = 0.5 * SCREEN_HEIGHT;
+            int p = y - screenHeight / 2;
+            float posZ = 0.5 * screenHeight;
             float rowDistance = posZ / p;
 
-            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / SCREEN_WIDTH;
-            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / SCREEN_WIDTH;
+            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / screenWidth;
+            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / screenWidth;
 
             float floorX = player.x + rowDistance * rayDirX0;
             float floorY = player.y + rowDistance * rayDirY0;
@@ -196,36 +196,36 @@ void renderScene() {
             renderTexturedFloor(y, floorX, floorY, floorStepX, floorStepY);
         }
 
-        for (int x = 0; x < SCREEN_WIDTH; x++) { // murs
-            float rayAngle = ((player.angle - (FOV / 2.0)) + ((float)x / (float)SCREEN_WIDTH) * FOV) * (M_PI / 180); // Angle du rayon
+        for (int x = 0; x < screenWidth; x++) { // murs
+            float rayAngle = ((player.angle - (FOV / 2.0)) + ((float)x / (float)screenWidth) * FOV) * (M_PI / 180); // Angle du rayon
             float distance;
             int wallType, wallSide;
 
             castRay(rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
 
-            int wallHeight = (int)(SCREEN_HEIGHT / distance);         // Hauteur du mur basée sur la distance
-            int drawStart = (SCREEN_HEIGHT - wallHeight) / 2;         // Point de départ du mur
+            int wallHeight = (int)(screenHeight / distance);         // Hauteur du mur basée sur la distance
+            int drawStart = (screenHeight - wallHeight) / 2;         // Point de départ du mur
             int drawEnd = drawStart + wallHeight;                     // Point de fin du mur
 
             if (drawStart < 0) drawStart = 0;                         
-            if (drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
+            if (drawEnd >= screenHeight) drawEnd = screenHeight - 1;
 
             renderTexturedWall(x, rayAngle, distance, wallType, wallSide, wallHeight, drawStart, drawEnd);
         }
     } else {
-        for (int x = 0; x < SCREEN_WIDTH; x++) {
-            float rayAngle = ((player.angle - (FOV / 2.0)) + ((float)x / (float)SCREEN_WIDTH) * FOV) * (M_PI / 180); // Angle du rayon
+        for (int x = 0; x < screenWidth; x++) {
+            float rayAngle = ((player.angle - (FOV / 2.0)) + ((float)x / (float)screenWidth) * FOV) * (M_PI / 180); // Angle du rayon
             float distance;
             int wallType, wallSide;
 
             castRay(rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
 
-            int wallHeight = (int)(SCREEN_HEIGHT / distance);         // Hauteur du mur basée sur la distance
-            int drawStart = (SCREEN_HEIGHT - wallHeight) / 2;         // Point de départ du mur
+            int wallHeight = (int)(screenHeight / distance);         // Hauteur du mur basée sur la distance
+            int drawStart = (screenHeight - wallHeight) / 2;         // Point de départ du mur
             int drawEnd = drawStart + wallHeight;                     // Point de fin du mur
 
             if (drawStart < 0) drawStart = 0;                         
-            if (drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
+            if (drawEnd >= screenHeight) drawEnd = screenHeight - 1;
 
             renderColoredWall(x, distance, wallType, wallSide, wallHeight, drawStart);
         }
@@ -233,6 +233,6 @@ void renderScene() {
 
     // glitchEffect(1);
 
-    SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, SCREEN_WIDTH * sizeof(Uint32));
+    SDL_UpdateTexture(screenBuffersTexture, NULL, screenBuffers, screenWidth * sizeof(Uint32));
     SDL_RenderCopy(renderer, screenBuffersTexture, NULL, NULL);
 }

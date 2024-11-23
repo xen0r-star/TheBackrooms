@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-extern void initializationTextures();
+extern int initializationTextures();
 
 #endif

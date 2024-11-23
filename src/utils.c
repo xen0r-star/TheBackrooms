@@ -41,7 +41,7 @@ int renderText(int x, int y, int w, int h, const char *text, SDL_Color color) {
 
 void showStateInterface() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 190);
-    SDL_Rect block = {10, 10, SCREEN_WIDTH / 3 - 10, SCREEN_HEIGHT / 2 - 10};
+    SDL_Rect block = {10, 10, screenWidth / 3 - 10, screenHeight / 2 - 10};
     SDL_RenderFillRect(renderer, &block);
 
     static char fpsText[25];
@@ -54,7 +54,7 @@ void showStateInterface() {
     renderText(30, 30, 100, 25, fpsText, (SDL_Color){255, 255, 255, 255});
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect wallRect = {30, 70, SCREEN_WIDTH / 3 - 60, 2};
+    SDL_Rect wallRect = {30, 70, screenWidth / 3 - 60, 2};
     SDL_RenderFillRect(renderer, &wallRect);
 
     sprintf(text, "Colision: %1d", colision);
@@ -70,7 +70,7 @@ void showStateInterface() {
 
 
 void showMapInterface() {
-    int drawSize = (SCREEN_HEIGHT * 0.4) / mapHeight;
+    int drawSize = (screenHeight * 0.4) / mapHeight;
     float increment = ((1.5 - 1.0) / (mapHeight - 1));
 
 
@@ -82,8 +82,8 @@ void showMapInterface() {
             SDL_SetRenderDrawColor(renderer, 220, 180, 120, 255);
 
             SDL_Rect mapRect = {
-                ((SCREEN_WIDTH - drawSize * deformation * 70) / 2) + x * drawSize * deformation,
-                (SCREEN_HEIGHT - drawSize * 60 - 25) + y * drawSize,
+                ((screenWidth - drawSize * deformation * 70) / 2) + x * drawSize * deformation,
+                (screenHeight - drawSize * 60 - 25) + y * drawSize,
                 drawSize * deformation + 1,
                 drawSize
             };
@@ -107,8 +107,8 @@ void showMapInterface() {
                 }
 
                 SDL_Rect block = {
-                    ((SCREEN_WIDTH - drawSize * deformation * mapWidth) / 2) + x * drawSize * deformation,  // X
-                    (SCREEN_HEIGHT - drawSize * mapHeight - 35) + y * drawSize,                             // Y
+                    ((screenWidth - drawSize * deformation * mapWidth) / 2) + x * drawSize * deformation,  // X
+                    (screenHeight - drawSize * mapHeight - 35) + y * drawSize,                             // Y
                     drawSize * deformation + 1,                                                                     // W
                     drawSize                                                                                        // H
                 };
@@ -121,8 +121,8 @@ void showMapInterface() {
 
     SDL_SetRenderDrawColor(renderer, 196, 65, 65, 255);
     SDL_Rect playerRect = { 
-        ((SCREEN_WIDTH - drawSize * deformation * mapWidth) / 2) + player.x * drawSize * deformation, 
-        (SCREEN_HEIGHT - drawSize * mapHeight - 35) + player.y * drawSize, 
+        ((screenWidth - drawSize * deformation * mapWidth) / 2) + player.x * drawSize * deformation, 
+        (screenHeight - drawSize * mapHeight - 35) + player.y * drawSize, 
         4, 4 
     };
     SDL_RenderFillRect(renderer, &playerRect);
@@ -161,8 +161,8 @@ void itemFrame(int selectFrame) {
 
     for (int i = 0; i < 5; i++) {
         SDL_Rect destRect = { 
-            ((SCREEN_WIDTH - 5 * 50) / 2) + i * 50, 
-            SCREEN_HEIGHT - 50 - 10, 
+            ((screenWidth - 5 * 50) / 2) + i * 50, 
+            screenHeight - 50 - 10, 
             50, 
             50 
         };

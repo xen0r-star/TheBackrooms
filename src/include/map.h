@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-extern void generateMap(int map[mapSize][mapSize], int MAP_WIDTH, int MAP_HEIGHT, int percentObstacles);
+extern void generateMap(int map[MAP_SIZE][MAP_SIZE], int MAP_WIDTH, int MAP_HEIGHT, int percentObstacles);
 
 #endif
