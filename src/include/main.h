@@ -14,7 +14,6 @@
 
 
 #define WINDOW_TITLE "ESCAPE THE BACKROOMS"         // Titre de la fenêtre
-#define FOV 60.0                                    // Champ de vision en degrés
 #define TEXTURE_SIZE 64                             // Taille des textures
 #define NUMBER_TEXTURES 4                           // Nombre de textures
 #define MAP_SIZE 50                                 // Taille de la map
@@ -22,7 +21,6 @@
 #define FONT_FILE "font/Roboto-Regular.ttf"         // Fichier de police
 #define BACKGROUND_FILE "image/background.png"      // Fichier de fond menu
 #define ICON_FILE "image/The_Backrooms_logo.png"    // Fichier d'icône
-
 
 
 // Structure
@@ -67,7 +65,6 @@ typedef struct {
     float rotateSpeed;
     float moveSpeed;
 
-    float sensitivity;
     float playerRotateSpeed;
     float playerMoveSpeed;
     int selectFrame;
@@ -109,6 +106,11 @@ typedef struct {
     Uint32     **textureBuffers;
 } GraphicsBuffers;
 
+typedef struct {
+    float sensitivity;
+    float fov;
+    float volume;
+} Settings;
 
 
 typedef struct {
@@ -117,6 +119,7 @@ typedef struct {
     MenuState menu;
     MapState mapState;
     GraphicsBuffers graphics;
+    Settings settings;
 } GameState;
 
 

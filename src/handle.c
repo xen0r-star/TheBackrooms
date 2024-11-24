@@ -113,7 +113,7 @@ void mouseHandle(GameState *state, const SDL_Event event) {
     if (event.type == SDL_MOUSEMOTION && displayMenu == MENU_NONE) {
         int mouseX = event.motion.xrel;
 
-        state->playerState.player.angle += mouseX * state->playerState.sensitivity;
+        state->playerState.player.angle += mouseX * state->settings.sensitivity;
         if (state->playerState.player.angle < 0)    state->playerState.player.angle += 360;
         if (state->playerState.player.angle >= 360) state->playerState.player.angle -= 360;
     } else if (event.type == SDL_MOUSEWHEEL) {

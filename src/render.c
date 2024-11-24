@@ -174,8 +174,8 @@ void renderScene(GameState *state) {
     // Dessin des colonnes de murs
     if (state->playerState.showTextures) {
         for (int y = state->app.screenHeight / 2 + 1; y < state->app.screenHeight; y++) { // sol et plafond
-            float angleRadians0 = (state->playerState.player.angle - (FOV / 2.0)) * (M_PI / 180.0);
-            float angleRadians1 = (state->playerState.player.angle + (FOV / 2.0)) * (M_PI / 180.0);
+            float angleRadians0 = (state->playerState.player.angle - (state->settings.fov / 2.0)) * (M_PI / 180.0);
+            float angleRadians1 = (state->playerState.player.angle + (state->settings.fov / 2.0)) * (M_PI / 180.0);
 
             float rayDirX0 = cos(angleRadians0);
             float rayDirY0 = sin(angleRadians0);
@@ -197,7 +197,7 @@ void renderScene(GameState *state) {
         }
 
         for (int x = 0; x < state->app.screenWidth; x++) { // murs
-            float rayAngle = ((state->playerState.player.angle - (FOV / 2.0)) + ((float)x / (float)state->app.screenWidth) * FOV) * (M_PI / 180); // Angle du rayon
+            float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) + ((float)x / (float)state->app.screenWidth) * state->settings.fov) * (M_PI / 180); // Angle du rayon
             float distance;
             int wallType, wallSide;
 
@@ -214,7 +214,7 @@ void renderScene(GameState *state) {
         }
     } else {
         for (int x = 0; x < state->app.screenWidth; x++) {
-            float rayAngle = ((state->playerState.player.angle - (FOV / 2.0)) + ((float)x / (float)state->app.screenWidth) * FOV) * (M_PI / 180); // Angle du rayon
+            float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) + ((float)x / (float)state->app.screenWidth) * state->settings.fov) * (M_PI / 180); // Angle du rayon
             float distance;
             int wallType, wallSide;
 
