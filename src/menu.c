@@ -4,7 +4,7 @@
 
 
 
-void drawButton(GameState *state, Button button, int type) {
+void drawButton(GameState *state, Button button, ButtonType type) {
     int x = button.rect.x;
     int y = button.rect.y;
     int w = button.rect.w;

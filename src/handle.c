@@ -127,7 +127,6 @@ void mouseHandle(GameState *state, const SDL_Event event) {
 
         switch (displayMenu) {
             case MENU_MAIN:
-                printf("main\n");
                 if (clickedButton(state->menu.playButton, mouseX, mouseY)) {
                     state->menu.displayMenu = MENU_LOAD;
                 } else if (clickedButton(state->menu.achievementsButton, mouseX, mouseY)) {

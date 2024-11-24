@@ -3,16 +3,20 @@
 
 #include "main.h"
 
-#define BUTTON_NORMAL 0
-#define BUTTON_SELECTED 1
-#define BUTTON_FOCUS 2
+typedef enum {
+    BUTTON_NORMAL,
+    BUTTON_SELECTED,
+    BUTTON_FOCUS
+} ButtonType;
 
-#define MENU_NONE 0
-#define MENU_MAIN 1
-#define MENU_LOAD 2
-#define MENU_ACHIEVEMENTS 3
-#define MENU_SETTINGS 4
-#define MENU_BREAK 5
+typedef enum {
+    MENU_NONE,
+    MENU_MAIN,
+    MENU_LOAD,
+    MENU_ACHIEVEMENTS,
+    MENU_SETTINGS,
+    MENU_BREAK
+} MenuType;
 
 extern int initializationMenu(GameState *state);
 extern bool clickedButton(Button button, int mouseX, int mouseY);

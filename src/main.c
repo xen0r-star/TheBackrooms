@@ -8,56 +8,6 @@
 #include "utils.h"
 
 
-// int screenWidth = 800;
-// int screenHeight = 600;
-
-// SDL_Renderer *renderer = NULL;
-// SDL_Window *window = NULL;
-// const Uint8 *keystate;
-// SDL_GameController *controller = NULL;
-// TTF_Font *font = NULL;
-// SDL_Texture *message = NULL;
-// Uint32 *screenBuffers;
-// SDL_Texture* screenBuffersTexture;
-// Uint32 **textureBuffers;
-// SDL_Texture *backgroundTexture = NULL;
-
-// Button playButton;
-// Button achievementsButton;
-// Button settingsButton;
-// Button exitButton;
-// Button resumeGameButton;
-// Button extiGameButton;
-// Button loadGame1;
-// Button loadGame2;
-// Button loadGame3;
-// Button launchGame;
-
-// bool running = true;
-// bool showMap = false;
-// bool showState = false;
-// bool showTextures = true;
-// bool colision = true;
-// int displayMenu = MENU_MAIN;
-
-// Player player = {4.0, 4.0, 0.0};
-// float rotateSpeed = 150.0;
-// float moveSpeed = 3.0;
-// float sensitivity = 0.2;
-// int selectFrame = 1;
-
-// float playerRotateSpeed, playerMoveSpeed;
-
-// int mapWidth = MAP_SIZE;
-// int mapHeight = MAP_SIZE;
-// int map[MAP_SIZE][MAP_SIZE];
-// int mapDiscovered[MAP_SIZE][MAP_SIZE];
-
-// int typeLaunchGame[3] = ;
-
-// float fps;
-// clock_t startTime, previousTime;
-
 
 GameState gameState = {
     .app = {800, 600, true, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0},
@@ -76,7 +26,6 @@ int main(int argc, char *argv[]) {
 
     GameState *state = malloc(sizeof(GameState));
     *state = gameState;
-
 
     if (initializationWindow(state)  ) return 1;
     if (initializationMenu(state)    ) return 1;
