@@ -14,8 +14,8 @@
 #define MENU_SETTINGS 4
 #define MENU_BREAK 5
 
-extern int initializationMenu();
+extern int initializationMenu(GameState *state);
 extern bool clickedButton(Button button, int mouseX, int mouseY);
-extern void drawMenu();
+extern void drawMenu(GameState *state);
 
 #endif

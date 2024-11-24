@@ -1,6 +1,6 @@
 #include "texture.h"
 
-int initializationTextures() {
+int initializationTextures(GameState *state) {
     const char* texturePaths[NUMBER_TEXTURES] = {
         "textures/breadMat.png",
         "textures/breadMat.png",
@@ -9,10 +9,10 @@ int initializationTextures() {
         "textures/ceiling.png",
     };
 
-    textureBuffers = (Uint32**)malloc(NUMBER_TEXTURES * sizeof(Uint32*));
+    state->graphics.textureBuffers = (Uint32**)malloc(NUMBER_TEXTURES * sizeof(Uint32*));
     for (int i = 0; i < NUMBER_TEXTURES; i++) {
         SDL_Surface* surface = IMG_Load(texturePaths[i]);
-        textureBuffers[i] = (Uint32*)malloc(TEXTURE_SIZE * TEXTURE_SIZE * sizeof(Uint32));
+        state->graphics.textureBuffers[i] = (Uint32*)malloc(TEXTURE_SIZE * TEXTURE_SIZE * sizeof(Uint32));
     
         for (int y = 0; y < TEXTURE_SIZE; y++) {
             for (int x = 0; x < TEXTURE_SIZE; x++) {
@@ -21,7 +21,7 @@ int initializationTextures() {
                     |   (((pixel >> 8 ) & 0xFF) << 16) 
                     |   (((pixel >> 16) & 0xFF) << 8 ) 
                     |   ((pixel  >> 24) & 0xFF);
-                textureBuffers[i][y * TEXTURE_SIZE + x] = pixel;
+                state->graphics.textureBuffers[i][y * TEXTURE_SIZE + x] = pixel;
             }
         }
 
@@ -30,14 +30,14 @@ int initializationTextures() {
 
 
     // Création de la texture de rendu
-    screenBuffersTexture = SDL_CreateTexture(
-        renderer,
+    state->graphics.screenBuffersTexture = SDL_CreateTexture(
+        state->app.renderer,
         SDL_PIXELFORMAT_ARGB8888,
         SDL_TEXTUREACCESS_STREAMING,
-        screenWidth, screenHeight
+        state->app.screenWidth, state->app.screenHeight
     );
 
-    screenBuffers = (Uint32 *)malloc(screenWidth * screenHeight * sizeof(Uint32));
+    state->graphics.screenBuffers = (Uint32 *)malloc(state->app.screenWidth * state->app.screenHeight * sizeof(Uint32));
 
     return 0;
 }

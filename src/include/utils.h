@@ -3,13 +3,13 @@
 
 #include "main.h"
 
-extern void calculateFPS();
+extern void calculateFPS(GameState *state);
 
-extern int renderText(int x, int y, int w, int h, const char *text, SDL_Color color);
+extern int renderText(GameState *state, int x, int y, int w, int h, const char *text, SDL_Color color);
 
-extern void showStateInterface();
-extern void showMapInterface();
+extern void showStateInterface(GameState *state);
+extern void showMapInterface(GameState *state);
 
-extern void itemFrame(int selectFrame);
+extern void itemFrame(GameState *state, int selectFrame);
 
 #endif

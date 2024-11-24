@@ -2,23 +2,23 @@
 #include "menu.h"
 #include "data.h"
 
-void keyboardDown(const SDL_Event event) {
+void keyboardDown(GameState *state, const SDL_Event event) {
     if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
             case SDLK_m:
-                showMap = !showMap;
+                state->playerState.showMap      = !state->playerState.showMap;
                 break;
             case SDLK_f:
-                showState = !showState;
+                state->playerState.showState    = !state->playerState.showState;
                 break;
             case SDLK_t:
-                showTextures = !showTextures;
+                state->playerState.showTextures = !state->playerState.showTextures;
                 break;
             case SDLK_c:
-                colision = !colision;
+                state->playerState.collision    = !state->playerState.collision;
                 break;
             case SDLK_ESCAPE:
-                if (displayMenu == MENU_NONE) displayMenu = MENU_BREAK;
+                if (state->menu.displayMenu == MENU_NONE) state->menu.displayMenu = MENU_BREAK;
                 break;
             default:
                 break;
@@ -28,95 +28,97 @@ void keyboardDown(const SDL_Event event) {
 
 
 
-void keyboardInput() {
+void keyboardInput(GameState *state) {
     // Avancer
-    if (keystate[SDL_SCANCODE_UP] || keystate[26]) {
-        float newX = player.x + cos(player.angle * M_PI / 180) * playerMoveSpeed;
-        float newY = player.y + sin(player.angle * M_PI / 180) * playerMoveSpeed;
-        if (colision) { // Vérifie les collisions avec les murs
-            if (map[(int)newY][(int)newX] == 0) {
-                player.x = newX;
-                player.y = newY;
+    if (state->app.keystate[SDL_SCANCODE_UP] || state->app.keystate[26]) {
+        float newX = state->playerState.player.x + cos(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed;
+        float newY = state->playerState.player.y + sin(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed;
+        if (state->playerState.collision) { // Vérifie les collisions avec les murs
+            if (state->mapState.map[(int)newY][(int)newX] == 0) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         } else {
-            if (map[(int)newY][(int)newX] != 1) {
-                player.x = newX;
-                player.y = newY;
+            if (state->mapState.map[(int)newY][(int)newX] != 1) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         }
     }
 
     // Reculer
-    if (keystate[SDL_SCANCODE_DOWN] || keystate[22]) {
-        float newX = player.x - cos(player.angle * M_PI / 180) * playerMoveSpeed;
-        float newY = player.y - sin(player.angle * M_PI / 180) * playerMoveSpeed;
-        if (colision) { // Vérifie les collisions avec les murs
-            if (map[(int)newY][(int)newX] == 0) {
-                player.x = newX;
-                player.y = newY;
+    if (state->app.keystate[SDL_SCANCODE_DOWN] || state->app.keystate[22]) {
+        float newX = state->playerState.player.x - cos(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed;
+        float newY = state->playerState.player.y - sin(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed;
+        if (state->playerState.collision) { // Vérifie les collisions avec les murs
+            if (state->mapState.map[(int)newY][(int)newX] == 0) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         } else {
-            if (map[(int)newY][(int)newX] != 1) {
-                player.x = newX;
-                player.y = newY;
+            if (state->mapState.map[(int)newY][(int)newX] != 1) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         }
     }
 
-    if (keystate[4]) {
-        float newX = player.x + sin(player.angle * M_PI / 180) * playerMoveSpeed / 2;
-        float newY = player.y - cos(player.angle * M_PI / 180) * playerMoveSpeed / 2;
-        if (colision) { // Vérifie les collisions avec les murs
-            if (map[(int)newY][(int)newX] == 0) {
-                player.x = newX;
-                player.y = newY;
+    if (state->app.keystate[4]) {
+        float newX = state->playerState.player.x + sin(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed / 2;
+        float newY = state->playerState.player.y - cos(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed / 2;
+        if (state->playerState.collision) { // Vérifie les collisions avec les murs
+            if (state->mapState.map[(int)newY][(int)newX] == 0) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         } else {
-            if (map[(int)newY][(int)newX] != 1) {
-                player.x = newX;
-                player.y = newY;
+            if (state->mapState.map[(int)newY][(int)newX] != 1) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         }
     }
 
-    if (keystate[7]) {
-        float newX = player.x - sin(player.angle * M_PI / 180) * playerMoveSpeed / 2;
-        float newY = player.y + cos(player.angle * M_PI / 180) * playerMoveSpeed / 2;
-        if (colision) { // Vérifie les collisions avec les murs
-            if (map[(int)newY][(int)newX] == 0) {
-                player.x = newX;
-                player.y = newY;
+    if (state->app.keystate[7]) {
+        float newX = state->playerState.player.x - sin(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed / 2;
+        float newY = state->playerState.player.y + cos(state->playerState.player.angle * M_PI / 180) * state->playerState.playerMoveSpeed / 2;
+        if (state->playerState.collision) { // Vérifie les collisions avec les murs
+            if (state->mapState.map[(int)newY][(int)newX] == 0) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         } else {
-            if (map[(int)newY][(int)newX] != 1) {
-                player.x = newX;
-                player.y = newY;
+            if (state->mapState.map[(int)newY][(int)newX] != 1) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         }
     }
 
-    if (keystate[SDL_SCANCODE_LEFT]) {
-        player.angle -= playerRotateSpeed;
-        if (player.angle < 0) player.angle += 360;
+    if (state->app.keystate[SDL_SCANCODE_LEFT]) {
+        state->playerState.player.angle -= state->playerState.playerRotateSpeed;
+        if (state->playerState.player.angle < 0) state->playerState.player.angle += 360;
     }
 
-    if (keystate[SDL_SCANCODE_RIGHT]) {
-        player.angle += playerRotateSpeed;
-        if (player.angle >= 360) player.angle -= 360;
+    if (state->app.keystate[SDL_SCANCODE_RIGHT]) {
+        state->playerState.player.angle += state->playerState.playerRotateSpeed;
+        if (state->playerState.player.angle >= 360) state->playerState.player.angle -= 360;
     }
 }
 
 
-void mouseHandle(const SDL_Event event) {
+void mouseHandle(GameState *state, const SDL_Event event) {
+    int displayMenu = state->menu.displayMenu;
+
     if (event.type == SDL_MOUSEMOTION && displayMenu == MENU_NONE) {
         int mouseX = event.motion.xrel;
 
-        player.angle += mouseX * sensitivity;
-        if (player.angle < 0) player.angle += 360;
-        if (player.angle >= 360) player.angle -= 360;
+        state->playerState.player.angle += mouseX * state->playerState.sensitivity;
+        if (state->playerState.player.angle < 0)    state->playerState.player.angle += 360;
+        if (state->playerState.player.angle >= 360) state->playerState.player.angle -= 360;
     } else if (event.type == SDL_MOUSEWHEEL) {
-        if (event.wheel.y > 0 && selectFrame > 1)       selectFrame -= 1;
-        else if (event.wheel.y < 0 && selectFrame < 5) selectFrame += 1;
+        if (event.wheel.y > 0 && state->playerState.selectFrame > 1)       state->playerState.selectFrame -= 1;
+        else if (event.wheel.y < 0 && state->playerState.selectFrame < 5)  state->playerState.selectFrame += 1;
     }
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && displayMenu != MENU_NONE) {
@@ -125,39 +127,40 @@ void mouseHandle(const SDL_Event event) {
 
         switch (displayMenu) {
             case MENU_MAIN:
-                if (clickedButton(playButton, mouseX, mouseY)) {
-                    displayMenu = MENU_LOAD;
-                } else if (clickedButton(achievementsButton, mouseX, mouseY)) {
-                    displayMenu = MENU_ACHIEVEMENTS;
-                } else if (clickedButton(settingsButton, mouseX, mouseY)) {
-                    displayMenu = MENU_SETTINGS;
-                } else if (clickedButton(exitButton, mouseX, mouseY)) {
-                    running = false;
+                printf("main\n");
+                if (clickedButton(state->menu.playButton, mouseX, mouseY)) {
+                    state->menu.displayMenu = MENU_LOAD;
+                } else if (clickedButton(state->menu.achievementsButton, mouseX, mouseY)) {
+                    state->menu.displayMenu = MENU_ACHIEVEMENTS;
+                } else if (clickedButton(state->menu.settingsButton, mouseX, mouseY)) {
+                    state->menu.displayMenu = MENU_SETTINGS;
+                } else if (clickedButton(state->menu.exitButton, mouseX, mouseY)) {
+                    state->app.running = false;
                 }
                 break;
             
             case MENU_LOAD:
-                if (clickedButton(loadGame1, mouseX, mouseY)) {
-                    typeLaunchGame[0] = BUTTON_SELECTED;
-                } else if (clickedButton(loadGame2, mouseX, mouseY)) {
-                    typeLaunchGame[1] = BUTTON_SELECTED;
-                } else if (clickedButton(loadGame3, mouseX, mouseY)) {
-                    typeLaunchGame[2] = BUTTON_SELECTED;
-                } else if (clickedButton(launchGame, mouseX, mouseY)) {
-                    displayMenu = MENU_NONE;
+                if (clickedButton(state->menu.loadGame1, mouseX, mouseY)) {
+                    state->mapState.typeLaunchGame[0] = BUTTON_SELECTED;
+                } else if (clickedButton(state->menu.loadGame2, mouseX, mouseY)) {
+                    state->mapState.typeLaunchGame[1] = BUTTON_SELECTED;
+                } else if (clickedButton(state->menu.loadGame3, mouseX, mouseY)) {
+                    state->mapState.typeLaunchGame[2] = BUTTON_SELECTED;
+                } else if (clickedButton(state->menu.launchGame, mouseX, mouseY)) {
+                    state->menu.displayMenu = MENU_NONE;
                 }
                 break;
             
             case MENU_BREAK:
-                if (clickedButton(resumeGameButton, mouseX, mouseY)) {
-                    displayMenu = MENU_NONE;
-                } else if (clickedButton(achievementsButton, mouseX, mouseY)) { 
-                    displayMenu = MENU_ACHIEVEMENTS;
-                } else if (clickedButton(settingsButton, mouseX, mouseY)) {     
-                    displayMenu = MENU_SETTINGS;
-                } else if (clickedButton(extiGameButton, mouseX, mouseY)) {
-                    displayMenu = MENU_MAIN;
-                    saveData("Save1");
+                if (clickedButton(state->menu.resumeGameButton, mouseX, mouseY)) {
+                    state->menu.displayMenu = MENU_NONE;
+                } else if (clickedButton(state->menu.achievementsButton, mouseX, mouseY)) { 
+                    state->menu.displayMenu = MENU_ACHIEVEMENTS;
+                } else if (clickedButton(state->menu.settingsButton, mouseX, mouseY)) {     
+                    state->menu.displayMenu = MENU_SETTINGS;
+                } else if (clickedButton(state->menu.exitGameButton, mouseX, mouseY)) {
+                    state->menu.displayMenu = MENU_MAIN;
+                    saveData(state, "Save1");
                 }
                 break;
             
@@ -168,23 +171,23 @@ void mouseHandle(const SDL_Event event) {
 }
 
 
-void controllerDown(const SDL_Event event) {
+void controllerDown(GameState *state, const SDL_Event event) {
     if (event.type == SDL_CONTROLLERBUTTONDOWN) {
         switch (event.cbutton.button) {
             case SDL_CONTROLLER_BUTTON_Y:     
-                showMap = !showMap; 
+                state->playerState.showMap = !state->playerState.showMap; 
                 break;
             case SDL_CONTROLLER_BUTTON_BACK:  
-                showTextures = !showTextures; 
+                state->playerState.showTextures = !state->playerState.showTextures; 
                 break;
             case SDL_CONTROLLER_BUTTON_START: 
-                showState = !showState; 
+                state->playerState.showState = !state->playerState.showState; 
                 break;
             case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-                if (displayMenu == MENU_NONE && selectFrame < 10) selectFrame += 1;
+                if (state->menu.displayMenu == MENU_NONE && state->playerState.selectFrame < 10) state->playerState.selectFrame += 1;
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-                if (displayMenu == MENU_NONE && selectFrame > 1) selectFrame -= 1;
+                if (state->menu.displayMenu == MENU_NONE && state->playerState.selectFrame > 1)  state->playerState.selectFrame -= 1;
                 break;
             default: break;
         }
@@ -194,50 +197,50 @@ void controllerDown(const SDL_Event event) {
 
 
 
-void controllerInput() {
+void controllerInput(GameState *state) {
     SDL_GameControllerUpdate();
 
 
-    Sint16 axisLX = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
-    Sint16 axisLY = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
-    Sint16 axisRX = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTX);
+    Sint16 axisLX = SDL_GameControllerGetAxis(state->app.controller, SDL_CONTROLLER_AXIS_LEFTX);
+    Sint16 axisLY = SDL_GameControllerGetAxis(state->app.controller, SDL_CONTROLLER_AXIS_LEFTY);
+    Sint16 axisRX = SDL_GameControllerGetAxis(state->app.controller, SDL_CONTROLLER_AXIS_RIGHTX);
     // Sint16 axisRY = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTY);
 
     if (abs(axisLY) > 8000) {
-        float newX = player.x - cos(player.angle * M_PI / 180) * (axisLY / 32767.0f) * playerMoveSpeed;
-        float newY = player.y - sin(player.angle * M_PI / 180) * (axisLY / 32767.0f) * playerMoveSpeed;
-        if (colision) {
-            if (map[(int)newY][(int)newX] == 0) {
-                player.x = newX;
-                player.y = newY;
+        float newX = state->playerState.player.x - cos(state->playerState.player.angle * M_PI / 180) * (axisLY / 32767.0f) * state->playerState.playerMoveSpeed;
+        float newY = state->playerState.player.y - sin(state->playerState.player.angle * M_PI / 180) * (axisLY / 32767.0f) * state->playerState.playerMoveSpeed;
+        if (state->playerState.collision) {
+            if (state->mapState.map[(int)newY][(int)newX] == 0) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         } else {
-            if (map[(int)newY][(int)newX] != 1) {
-                player.x = newX;
-                player.y = newY;
+            if (state->mapState.map[(int)newY][(int)newX] != 1) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         }
     }
 
     if (abs(axisLX) > 8000) {
-        float newX = player.x - sin(player.angle * M_PI / 180) * (axisLX / 32767.0f) * playerMoveSpeed / 2;
-        float newY = player.y + cos(player.angle * M_PI / 180) * (axisLX / 32767.0f) * playerMoveSpeed / 2;
-        if (colision) {
-            if (map[(int)newY][(int)newX] == 0) {
-                player.x = newX;
-                player.y = newY;
+        float newX = state->playerState.player.x - sin(state->playerState.player.angle * M_PI / 180) * (axisLX / 32767.0f) * state->playerState.playerMoveSpeed / 2;
+        float newY = state->playerState.player.y + cos(state->playerState.player.angle * M_PI / 180) * (axisLX / 32767.0f) * state->playerState.playerMoveSpeed / 2;
+        if (state->playerState.collision) {
+            if (state->mapState.map[(int)newY][(int)newX] == 0) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         } else {
-            if (map[(int)newY][(int)newX] != 1) {
-                player.x = newX;
-                player.y = newY;
+            if (state->mapState.map[(int)newY][(int)newX] != 1) {
+                state->playerState.player.x = newX;
+                state->playerState.player.y = newY;
             }
         }
     }
 
     if (abs(axisRX) > 8000) {
-        player.angle += (axisRX / 32767.0f) * playerRotateSpeed;
-        if (player.angle < 0) player.angle += 360;
-        if (player.angle >= 360) player.angle -= 360;
+        state->playerState.player.angle += (axisRX / 32767.0f) * state->playerState.playerRotateSpeed;
+        if (state->playerState.player.angle < 0)    state->playerState.player.angle += 360;
+        if (state->playerState.player.angle >= 360) state->playerState.player.angle -= 360;
     }
 }

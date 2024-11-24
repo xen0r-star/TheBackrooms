@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-extern int saveData(const char *nameSave);
-extern int readData(const char *nameSave);
+extern int saveData(GameState *state, const char *nameSave);
+extern int readData(GameState *state, const char *nameSave);
 
 #endif

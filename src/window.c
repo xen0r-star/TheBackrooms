@@ -1,6 +1,6 @@
 #include "window.h"
 
-int initializationWindow() {
+int initializationWindow(GameState *state) {
     // Initialisation de SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -13,26 +13,26 @@ int initializationWindow() {
     }
 
     // Création de la fenêtre SDL
-    window = SDL_CreateWindow(WINDOW_TITLE,
+    state->app.window = SDL_CreateWindow(WINDOW_TITLE,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          screenWidth, screenHeight, SDL_WINDOW_RESIZABLE);
-    if (window == NULL) {
+                                          state->app.screenWidth, state->app.screenHeight, SDL_WINDOW_RESIZABLE);
+    if (state->app.window == NULL) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
 
     // Création du renderer SDL
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == NULL) {
-        SDL_DestroyWindow(window);
+    state->app.renderer = SDL_CreateRenderer(state->app.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (state->app.renderer == NULL) {
+        SDL_DestroyWindow(state->app.window);
         printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
     
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawBlendMode(state->app.renderer, SDL_BLENDMODE_BLEND);
 
 
     SDL_Surface *iconSurface = IMG_Load(ICON_FILE);
@@ -41,28 +41,28 @@ int initializationWindow() {
         return 1;
     }
 
-    SDL_SetWindowIcon(window, iconSurface);
+    SDL_SetWindowIcon(state->app.window, iconSurface);
     SDL_FreeSurface(iconSurface);
 
-    font = TTF_OpenFont(FONT_FILE, 72);
-    if (!font) {
+    state->app.font = TTF_OpenFont(FONT_FILE, 72);
+    if (!state->app.font) {
         printf("Erreur lors du chargement de la police: %s\n", TTF_GetError());
         return 1;
     }
 
     SDL_SetRelativeMouseMode(SDL_FALSE);
-    keystate = SDL_GetKeyboardState(NULL);
+    state->app.keystate = SDL_GetKeyboardState(NULL);
     
     if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     } else {
         for (int i = 0; i < SDL_NumJoysticks(); i++) {
             if (SDL_IsGameController(i)) {
-                controller = SDL_GameControllerOpen(i);
+                state->app.controller = SDL_GameControllerOpen(i);
             }
         }
 
-        if (controller == NULL) {
+        if (state->app.controller == NULL) {
             printf("Could not open gamecontroller! SDL_Error: %s\n", SDL_GetError());
         }
     }
@@ -70,30 +70,32 @@ int initializationWindow() {
     return 0;
 }
 
-int closeWindow() {
+int closeWindow(GameState *state) {
     // Libérer la mémoire pour chaque texture
     for (int i = 0; i < NUMBER_TEXTURES; i++) {
-        free(textureBuffers[i]);
+        free(state->graphics.textureBuffers[i]);
     }
 
-    free(textureBuffers);
+    free(state->graphics.textureBuffers);
 
-    if (controller != NULL) {
-        SDL_GameControllerClose(controller);
-        controller = NULL;
+    if (state->app.controller != NULL) {
+        SDL_GameControllerClose(state->app.controller);
+        state->app.controller = NULL;
     }
 
 
     // Nettoyage de SDL
-    SDL_DestroyTexture(backgroundTexture);
-    SDL_DestroyTexture(message);
-    TTF_CloseFont(font);
+    SDL_DestroyTexture(state->menu.backgroundTexture);
+    SDL_DestroyTexture(state->app.message);
+    TTF_CloseFont(state->app.font);
     
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(state->app.renderer);
+    SDL_DestroyWindow(state->app.window);
 
     TTF_Quit();
     SDL_Quit();
+
+    free(state);
 
     return 0;
 }

@@ -4,6 +4,6 @@
 #include "main.h"
 #include "castRay.h"
 
-extern void renderScene();
+extern void renderScene(GameState *state);
 
 #endif

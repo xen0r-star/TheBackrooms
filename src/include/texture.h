@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-extern int initializationTextures();
+extern int initializationTextures(GameState *state);
 
 #endif

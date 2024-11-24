@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-extern int initializationWindow();
-extern int closeWindow();
+extern int initializationWindow(GameState *state);
+extern int closeWindow(GameState *state);
 
 #endif
