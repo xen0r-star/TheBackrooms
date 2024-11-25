@@ -8,7 +8,6 @@
 #include "utils.h"
 
 
-
 GameState gameState = {
     .app = {800, 600, true, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0},
     .playerState = {{4.0, 4.0, 0.0}, 150.0, 3.0, 0.0, 0.0, 1, false, false, true, true},
@@ -31,7 +30,6 @@ int main(int argc, char *argv[]) {
     if (initializationWindow(state)  ) return 1;
     if (initializationMenu(state)    ) return 1;
     if (initializationTextures(state)) return 1;
-
 
     // Boucle principale
     SDL_Event event;
@@ -60,17 +58,17 @@ int main(int argc, char *argv[]) {
             SDL_SetRelativeMouseMode(SDL_TRUE);
 
             // Calcul du FPS
-            calculateFPS(state);
+            calculateFPS(&state->app, &state->playerState);
 
 
             keyboardInput(state);
             if (state->app.controller != NULL) controllerInput(state);
 
             renderScene(state);
-            itemFrame(state, state->playerState.selectFrame);
+            itemFrame(state->app, state->playerState.selectFrame);
 
-            if (state->playerState.showState) showStateInterface(state);
-            if (state->playerState.showMap)   showMapInterface(state);
+            if (state->playerState.showState) showStateInterface(&state->app, state->playerState);
+            if (state->playerState.showMap)   showMapInterface(state->app, state->mapState, state->playerState);
         }
 
         // Mise à jour de l'écran

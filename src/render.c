@@ -1,11 +1,96 @@
 #include "render.h"
 
-void renderTexturedWall(GameState *state, int x, float rayAngle, float distance, int wallType, int wallSide, int wallHeight, int drawStart, int drawEnd) {
+void renderTexturedWall(const AppState appState, const PlayerState playerState, GraphicsBuffers *graphicsBuffers, int x, float rayAngle, float distance, int wallType, int wallSide, int wallHeight, int drawStart, int drawEnd);
+void renderTexturedFloor(const AppState appState, GraphicsBuffers *graphicsBuffers, int y, float floorX, float floorY, float floorStepX, float floorStepY);
+void renderColoredWall(const AppState appState, GraphicsBuffers *graphicsBuffers, int x, float distance, int wallType, int wallSide, int wallHeight, int drawStart);
+void glitchEffect(const AppState appState, GraphicsBuffers *graphicsBuffers, int speed);
+
+
+
+// renderScene: Fonction pour dessiner la scène
+void renderScene(GameState *state) {
+    // Dessin des colonnes de murs
+
+    if (state->playerState.showTextures) {
+        for (int y = state->app.screenHeight / 2 + 1; y < state->app.screenHeight; y++) { // sol et plafond
+            float angleRadians0 = (state->playerState.player.angle - (state->settings.fov / 2.0)) * (M_PI / 180.0);
+            float angleRadians1 = (state->playerState.player.angle + (state->settings.fov / 2.0)) * (M_PI / 180.0);
+
+            float rayDirX0 = cos(angleRadians0);
+            float rayDirY0 = sin(angleRadians0);
+            float rayDirX1 = cos(angleRadians1);
+            float rayDirY1 = sin(angleRadians1);
+
+
+            int p = y - state->app.screenHeight / 2;
+            float posZ = 0.5 * state->app.screenHeight;
+            float rowDistance = posZ / p;
+
+            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / state->app.screenWidth;
+            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / state->app.screenWidth;
+
+            float floorX = state->playerState.player.x + rowDistance * rayDirX0;
+            float floorY = state->playerState.player.y + rowDistance * rayDirY0;
+
+            renderTexturedFloor(state->app, &state->graphics, y, floorX, floorY, floorStepX, floorStepY);
+        }
+
+        for (int x = 0; x < state->app.screenWidth; x++) { // murs
+            float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) 
+                             + ((float)x / (float)state->app.screenWidth) * state->settings.fov) 
+                             * (M_PI / 180); // Angle du rayon
+            float distance;
+            int wallType, wallSide;
+
+            castRay(state->playerState, &state->mapState, rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
+
+            int wallHeight = (int)(state->app.screenHeight / distance);         // Hauteur du mur basée sur la distance
+            int drawStart = (state->app.screenHeight - wallHeight) / 2;         // Point de départ du mur
+            int drawEnd = drawStart + wallHeight;                               // Point de fin du mur
+
+            if (drawStart < 0) drawStart = 0;                         
+            if (drawEnd >= state->app.screenHeight) drawEnd = state->app.screenHeight - 1;
+
+            renderTexturedWall(state->app, state->playerState, &state->graphics, x, rayAngle, distance, wallType, wallSide, wallHeight, drawStart, drawEnd);
+        }
+    } else {
+        for (int x = 0; x < state->app.screenWidth; x++) {
+            float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) 
+                             + ((float)x / (float)state->app.screenWidth) * state->settings.fov)
+                             * (M_PI / 180);  // Angle du rayon
+            float distance;
+            int wallType, wallSide;
+
+            castRay(state->playerState, &state->mapState, rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
+
+            int wallHeight = (int)(state->app.screenHeight / distance);         // Hauteur du mur basée sur la distance
+            int drawStart = (state->app.screenHeight - wallHeight) / 2;         // Point de départ du mur
+            int drawEnd = drawStart + wallHeight;                               // Point de fin du mur
+
+            if (drawStart < 0) drawStart = 0;                         
+            if (drawEnd >= state->app.screenHeight) drawEnd = state->app.screenHeight - 1;
+
+            renderColoredWall(state->app, &state->graphics, x, distance, wallType, wallSide, wallHeight, drawStart);
+        }
+    }
+
+    // glitchEffect(state->app, state->graphics, 1);
+
+    SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, state->graphics.screenBuffers, state->app.screenWidth * sizeof(Uint32));
+    SDL_RenderCopy(state->app.renderer, state->graphics.screenBuffersTexture, NULL, NULL);
+}
+
+
+
+void renderTexturedWall(const AppState appState, const PlayerState playerState, GraphicsBuffers *graphicsBuffers, int x, float rayAngle, float distance, int wallType, int wallSide, int wallHeight, int drawStart, int drawEnd) {
+    int screenWidth = appState.screenWidth;
+    int screenHeight = appState.screenHeight;
+    
     double wallX;
     if (wallSide == 0)
-        wallX = state->playerState.player.y + distance * sin(rayAngle);
+        wallX = playerState.player.y + distance * sin(rayAngle);
     else
-        wallX = state->playerState.player.x + distance * cos(rayAngle);
+        wallX = playerState.player.x + distance * cos(rayAngle);
     wallX -= floor((wallX));
 
 
@@ -16,13 +101,13 @@ void renderTexturedWall(GameState *state, int x, float rayAngle, float distance,
         texX = TEXTURE_SIZE - texX - 1;
 
     double step = 1.0 * TEXTURE_SIZE / wallHeight;
-    double texPos = (drawStart - state->app.screenHeight / 2 + wallHeight / 2) * step;
+    double texPos = (drawStart - screenHeight / 2 + wallHeight / 2) * step;
 
     for (int y = drawStart; y < drawEnd; y++) {
         int texY = (int)texPos & (TEXTURE_SIZE - 1);
         texPos += step;
 
-        Uint32 pixel = state->graphics.textureBuffers[wallType - 1][TEXTURE_SIZE * texY + texX];
+        Uint32 pixel = graphicsBuffers->textureBuffers[wallType - 1][TEXTURE_SIZE * texY + texX];
         Uint8 r = ((pixel >> 24) & 0xFF) / (wallSide == 1 ? 2 : 1);
         Uint8 g = ((pixel >> 16) & 0xFF) / (wallSide == 1 ? 2 : 1);
         Uint8 b = ((pixel >> 8 ) & 0xFF) / (wallSide == 1 ? 2 : 1);
@@ -34,12 +119,17 @@ void renderTexturedWall(GameState *state, int x, float rayAngle, float distance,
         g = (Uint8)((1 - fogFactor) * g + fogFactor * 0);
         b = (Uint8)((1 - fogFactor) * b + fogFactor * 0);
 
-        state->graphics.screenBuffers[y * state->app.screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
+        graphicsBuffers->screenBuffers[y * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
     }
 }
 
-void renderTexturedFloor(GameState *state, int y, float floorX, float floorY, float floorStepX, float floorStepY) {
-    for (int x = 0; x < state->app.screenWidth; ++x) {
+
+
+void renderTexturedFloor(const AppState appState, GraphicsBuffers *graphicsBuffers, int y, float floorX, float floorY, float floorStepX, float floorStepY) {
+    int screenWidth = appState.screenWidth;
+    int screenHeight = appState.screenHeight;
+    
+    for (int x = 0; x < screenWidth; ++x) {
         int cellX = (int)(floorX);
         int cellY = (int)(floorY);
 
@@ -53,26 +143,32 @@ void renderTexturedFloor(GameState *state, int y, float floorX, float floorY, fl
         Uint32 pixel;
         Uint8 r, g, b, a;
 
-        pixel = state->graphics.textureBuffers[NUMBER_TEXTURES - 1][TEXTURE_SIZE * texY + texX];
+        pixel = graphicsBuffers->textureBuffers[NUMBER_TEXTURES - 1][TEXTURE_SIZE * texY + texX];
         r = ((pixel >> 24) & 0xFF) / 2;
         g = ((pixel >> 16) & 0xFF) / 2;
         b = ((pixel >> 8 ) & 0xFF) / 2;
         a = pixel & 0xFF;
 
-        state->graphics.screenBuffers[y * state->app.screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
+        graphicsBuffers->screenBuffers[y * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
 
 
-        pixel = state->graphics.textureBuffers[NUMBER_TEXTURES - 2][TEXTURE_SIZE * texY + texX];
+        pixel = graphicsBuffers->textureBuffers[NUMBER_TEXTURES - 2][TEXTURE_SIZE * texY + texX];
         r = ((pixel >> 24) & 0xFF) / 2;
         g = ((pixel >> 16) & 0xFF) / 2;
         b = ((pixel >> 8 ) & 0xFF) / 2;
         a = pixel & 0xFF;
 
-        state->graphics.screenBuffers[(state->app.screenHeight - y - 1) * state->app.screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
+        graphicsBuffers->screenBuffers[(screenHeight - y - 1) * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
     }
 }
 
-void renderColoredWall(GameState *state, int x, float distance, int wallType, int wallSide, int wallHeight, int drawStart) {
+
+
+
+void renderColoredWall(const AppState appState, GraphicsBuffers *graphicsBuffers, int x, float distance, int wallType, int wallSide, int wallHeight, int drawStart) {
+    int screenWidth = appState.screenWidth;
+    int screenHeight = appState.screenHeight;
+
     Color color;
     switch (wallType) {
         case 1: color = (Color){184, 181,  55, 255}; break;
@@ -96,40 +192,43 @@ void renderColoredWall(GameState *state, int x, float distance, int wallType, in
     color.b = (1 - fogFactor) * color.b + fogFactor * 170;
 
     // Dessiner le mur
-    for (int y = 0; y < state->app.screenHeight; y++) {
+    for (int y = 0; y < screenHeight; y++) {
         if (y < drawStart) {
-            state->graphics.screenBuffers[y * state->app.screenWidth + x] = 0xFF474112;
+            graphicsBuffers->screenBuffers[y * screenWidth + x] = 0xFF474112;
         } else if (y > drawStart + wallHeight) {
-            state->graphics.screenBuffers[y * state->app.screenWidth + x] = 0xFF524B1C;
+            graphicsBuffers->screenBuffers[y * screenWidth + x] = 0xFF524B1C;
         } else {
-            state->graphics.screenBuffers[y * state->app.screenWidth + x] = (color.a << 24) | (color.r << 16) | (color.g << 8) | color.b;
+            graphicsBuffers->screenBuffers[y * screenWidth + x] = (color.a << 24) | (color.r << 16) | (color.g << 8) | color.b;
         }
     }
 }
 
 
 
-void glitchEffect(GameState *state, int speed) {
+void glitchEffect(const AppState appState, GraphicsBuffers *graphicsBuffers, int speed) {
+    int screenWidth = appState.screenWidth;
+    int screenHeight = appState.screenHeight;
+
     srand(clock() / (1000 / speed));
 
     // 1. Lignes de balayage (scan lines)
-    for (int y = 0; y < state->app.screenHeight; y += 2) {
-        for (int x = 0; x < state->app.screenWidth; x++) {
-            int index = y * state->app.screenWidth + x;
-            state->graphics.screenBuffers[index] = (50 << 24) | (0 << 16) | (0 << 8) | 0;
+    for (int y = 0; y < screenHeight; y += 2) {
+        for (int x = 0; x < screenWidth; x++) {
+            int index = y * screenWidth + x;
+            graphicsBuffers->screenBuffers[index] = (50 << 24) | (0 << 16) | (0 << 8) | 0;
         }
     }
 
     // 2. Distorsions de ligne aléatoires
-    for (int y = 0; y < state->app.screenHeight; y += 15) { // Bandes de 15 pixels de hauteur
+    for (int y = 0; y < screenHeight; y += 15) { // Bandes de 15 pixels de hauteur
         int shift = (rand() % 10) - 5; // Décalage aléatoire entre -5 et +5 pixels
 
-        for (int x = 0; x < state->app.screenWidth; x++) {
-            int index = y * state->app.screenWidth + x;
+        for (int x = 0; x < screenWidth; x++) {
+            int index = y * screenWidth + x;
             int shiftedX = x + shift;
 
-            if (shiftedX >= 0 && shiftedX < state->app.screenWidth) {
-                state->graphics.screenBuffers[index] = state->graphics.screenBuffers[y * state->app.screenWidth + shiftedX];
+            if (shiftedX >= 0 && shiftedX < screenWidth) {
+                graphicsBuffers->screenBuffers[index] = graphicsBuffers->screenBuffers[y * screenWidth + shiftedX];
             }
         }
     }
@@ -166,73 +265,4 @@ void glitchEffect(GameState *state, int speed) {
     //         }
     //     }
     // }
-}
-
-
-// renderScene: Fonction pour dessiner la scène
-void renderScene(GameState *state) {
-    // Dessin des colonnes de murs
-    if (state->playerState.showTextures) {
-        for (int y = state->app.screenHeight / 2 + 1; y < state->app.screenHeight; y++) { // sol et plafond
-            float angleRadians0 = (state->playerState.player.angle - (state->settings.fov / 2.0)) * (M_PI / 180.0);
-            float angleRadians1 = (state->playerState.player.angle + (state->settings.fov / 2.0)) * (M_PI / 180.0);
-
-            float rayDirX0 = cos(angleRadians0);
-            float rayDirY0 = sin(angleRadians0);
-            float rayDirX1 = cos(angleRadians1);
-            float rayDirY1 = sin(angleRadians1);
-
-
-            int p = y - state->app.screenHeight / 2;
-            float posZ = 0.5 * state->app.screenHeight;
-            float rowDistance = posZ / p;
-
-            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / state->app.screenWidth;
-            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / state->app.screenWidth;
-
-            float floorX = state->playerState.player.x + rowDistance * rayDirX0;
-            float floorY = state->playerState.player.y + rowDistance * rayDirY0;
-
-            renderTexturedFloor(state, y, floorX, floorY, floorStepX, floorStepY);
-        }
-
-        for (int x = 0; x < state->app.screenWidth; x++) { // murs
-            float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) + ((float)x / (float)state->app.screenWidth) * state->settings.fov) * (M_PI / 180); // Angle du rayon
-            float distance;
-            int wallType, wallSide;
-
-            castRay(state, rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
-
-            int wallHeight = (int)(state->app.screenHeight / distance);         // Hauteur du mur basée sur la distance
-            int drawStart = (state->app.screenHeight - wallHeight) / 2;         // Point de départ du mur
-            int drawEnd = drawStart + wallHeight;                     // Point de fin du mur
-
-            if (drawStart < 0) drawStart = 0;                         
-            if (drawEnd >= state->app.screenHeight) drawEnd = state->app.screenHeight - 1;
-
-            renderTexturedWall(state, x, rayAngle, distance, wallType, wallSide, wallHeight, drawStart, drawEnd);
-        }
-    } else {
-        for (int x = 0; x < state->app.screenWidth; x++) {
-            float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) + ((float)x / (float)state->app.screenWidth) * state->settings.fov) * (M_PI / 180); // Angle du rayon
-            float distance;
-            int wallType, wallSide;
-
-            castRay(state, rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
-
-            int wallHeight = (int)(state->app.screenHeight / distance);         // Hauteur du mur basée sur la distance
-            int drawStart = (state->app.screenHeight - wallHeight) / 2;         // Point de départ du mur
-            int drawEnd = drawStart + wallHeight;                     // Point de fin du mur
-
-            if (drawStart < 0) drawStart = 0;                         
-            if (drawEnd >= state->app.screenHeight) drawEnd = state->app.screenHeight - 1;
-
-            renderColoredWall(state, x, distance, wallType, wallSide, wallHeight, drawStart);
-        }
-    }
-
-    // glitchEffect(1);
-
-    SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, state->graphics.screenBuffers, state->app.screenWidth * sizeof(Uint32));
-    SDL_RenderCopy(state->app.renderer, state->graphics.screenBuffersTexture, NULL, NULL);
 }

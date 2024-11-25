@@ -70,6 +70,8 @@ int initializationWindow(GameState *state) {
     return 0;
 }
 
+
+
 int closeWindow(GameState *state) {
     // Libérer la mémoire pour chaque texture
     for (int i = 0; i < NUMBER_TEXTURES; i++) {

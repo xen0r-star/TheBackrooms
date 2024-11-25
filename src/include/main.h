@@ -12,7 +12,6 @@
 #include <time.h>
 
 
-
 #define WINDOW_TITLE "ESCAPE THE BACKROOMS"         // Titre de la fenêtre
 #define TEXTURE_SIZE 64                             // Taille des textures
 #define NUMBER_TEXTURES 4                           // Nombre de textures

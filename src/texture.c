@@ -1,6 +1,9 @@
 #include "texture.h"
 
 int initializationTextures(GameState *state) {
+    int screenWidth = state->app.screenWidth;
+    int screenHeight = state->app.screenHeight;
+
     const char* texturePaths[NUMBER_TEXTURES] = {
         "textures/breadMat.png",
         "textures/breadMat.png",
@@ -34,10 +37,10 @@ int initializationTextures(GameState *state) {
         state->app.renderer,
         SDL_PIXELFORMAT_ARGB8888,
         SDL_TEXTUREACCESS_STREAMING,
-        state->app.screenWidth, state->app.screenHeight
+        screenWidth, screenHeight
     );
 
-    state->graphics.screenBuffers = (Uint32 *)malloc(state->app.screenWidth * state->app.screenHeight * sizeof(Uint32));
+    state->graphics.screenBuffers = (Uint32 *)malloc(screenWidth * screenHeight * sizeof(Uint32));
 
     return 0;
 }
