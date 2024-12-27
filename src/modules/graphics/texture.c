@@ -1,4 +1,4 @@
-#include "texture.h"
+#include "graphics.h"
 
 int initializationTextures(GameState *state) {
     int screenWidth = state->app.screenWidth;

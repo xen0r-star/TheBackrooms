@@ -1,7 +1,9 @@
-#ifndef handle_H
-#define handle_H
+#ifndef input_H
+#define input_H
 
-#include "main.h"
+#include "../../main.h"
+#include "../menu/menu.h"
+#include "../data/data.h"
 
 extern void keyboardDown(GameState *state, const SDL_Event event);
 extern void controllerDown(GameState *state, const SDL_Event event);

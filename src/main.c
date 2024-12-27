@@ -1,11 +1,9 @@
-#include "main.h"
-#include "window.h"
-#include "handle.h"
-#include "render.h"
-#include "data.h"
-#include "menu.h"
-#include "texture.h"
-#include "utils.h"
+#include "graphics/graphics.h"
+#include "input/input.h"
+#include "menu/menu.h"
+#include "utils/utils.h"
+#include "core/core.h"
+#include "data/data.h"
 
 
 GameState gameState = {

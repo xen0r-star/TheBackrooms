@@ -1,7 +1,7 @@
 #ifndef utils_H
 #define utils_H
 
-#include "main.h"
+#include "../../main.h"
 
 extern void calculateFPS(AppState *appState, PlayerState *playerState);
 

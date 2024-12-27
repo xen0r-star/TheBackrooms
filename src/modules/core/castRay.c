@@ -1,4 +1,4 @@
-#include "castRay.h"
+#include "core.h"
 
 // castRay: Fonction qui trace un rayon => retourne la distance jusqu'au mur et le type de mur
 int castRay(const PlayerState playerState, MapState *mapState, float angle, float *distance, int *wallType, int *wallSide) {

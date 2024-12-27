@@ -5,32 +5,45 @@ SRC_DIR = src
 BUILD_DIR = build
 INCLUDE_DIR = ./src/include
 LIB_DIR = ./src/lib
+MODULES_DIR = ./src/modules
 PUBLIC_DIR = public
 
-CFLAGS = -I$(INCLUDE_DIR) -L$(LIB_DIR) -Wall -Wextra -O2
+CFLAGS = -I$(INCLUDE_DIR) -I$(MODULES_DIR) -L$(LIB_DIR) -Wall -Wextra -O2
+LDFLAGS = -L$(LIB_DIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image
 
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+SRCS = $(wildcard $(MODULES_DIR)/**/*.c $(MODULES_DIR)/*.c $(SRC_DIR)/*.c)
+OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 RES = $(BUILD_DIR)/resource.o
 
 TARGET = $(BUILD_DIR)/TheBackrooms.exe
 
 
-
 all: clear-screen $(TARGET)
-	
-$(TARGET): $(OBJS) $(RES)
-	@echo Linking object files to create the executable: $(TARGET) 
-	$(CC) -o $(TARGET) $(OBJS) $(RES) -L$(LIB_DIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image
-	@echo \n\nExecutable created at: $(TARGET)
 
+# Création de l'exécutable	
+$(TARGET): $(OBJS) $(RES)
+	@echo Linking object files to create the executable: $(TARGET)
+	$(CC) -o $@ $(OBJS) $(RES) $(LDFLAGS)
+	@echo Executable created at: $(TARGET)
+
+
+# Compiling source files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+# @mkdir -p $(dir $@)
+	@echo Compiling $< to $@
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(RES): $(SRC_DIR)/resource.rc
+$(BUILD_DIR)/%.o: $(MODULES_DIR)/%.c
+	@echo Compiling $< to $@
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+# Resource management
+$(RES): $(SRC_DIR)/resources/resource.rc
 	$(WINDRES) --include-dir $(INCLUDE_DIR) $< -O coff -o $@
 
 
+# Secondary targets
 githubBuild: createBuildDir $(TARGET)
 	@echo Build completed. Executable created at: $(TARGET)
 
@@ -66,4 +79,7 @@ clearScreen:
 createBuildDir:
 	@mkdir -p build
 
-.PHONY: all clean dev build cleanBuild clearScreen githubBuild createBuildDir
+debug:
+	@echo $(SRCS)
+
+.PHONY: all clean dev build cleanBuild clearScreen githubBuild createBuildDir debug

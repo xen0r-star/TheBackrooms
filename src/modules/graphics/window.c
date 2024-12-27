@@ -1,4 +1,4 @@
-#include "window.h"
+#include "graphics.h"
 
 int initializationWindow(GameState *state) {
     // Initialisation de SDL
