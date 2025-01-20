@@ -10,7 +10,7 @@ GameState gameState = {
     .app = {800, 600, true, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0},
     .playerState = {{4.0, 4.0, 0.0}, 150.0, 3.0, 0.0, 0.0, 1, false, false, true, true},
     .menu = {MENU_MAIN},
-    .mapState = {MAP_SIZE, MAP_SIZE, {{0}}, {{0}}, {0, 0, 0}},
+    .mapState = {MAP_SIZE, MAP_SIZE, NULL, NULL, {0, 0, 0}},
     .graphics = {NULL, NULL, NULL},
     .settings = {0.2, 60.0, 1.0}
 };

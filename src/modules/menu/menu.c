@@ -7,7 +7,7 @@ void drawMenu(GameState *state) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
     if (state->menu.displayMenu == MENU_MAIN) {
-        SDL_RenderCopy(state->app.renderer, state->menu.backgroundTexture, NULL, NULL);
+        backgroundMenu(state);
         handleButtons(&state->app, mouseX, mouseY, 4, 
             state->menu.playButton, 
             state->menu.achievementsButton, 
@@ -15,7 +15,7 @@ void drawMenu(GameState *state) {
             state->menu.exitButton
         );
     } else if (state->menu.displayMenu == MENU_LOAD) { // Load
-        SDL_RenderCopy(state->app.renderer, state->menu.backgroundTexture, NULL, NULL);
+        backgroundMenu(state);
         SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
 
         // for (int i = 0; i < 3; i++) {
@@ -71,16 +71,11 @@ void drawMenu(GameState *state) {
         state->mapState.typeLaunchGame[1] = BUTTON_NORMAL;
         state->mapState.typeLaunchGame[2] = BUTTON_NORMAL; 
 
-        generateMap(state->mapState.map, MAP_SIZE, MAP_SIZE, 5);
-        for (int y = 0; y < MAP_SIZE; y++) {
-            for (int x = 0; x < MAP_SIZE; x++) {
-                state->mapState.mapDiscovered[y][x] = 0;
-            }
-        }
+        initializeMap(&state->mapState, MAP_SIZE, MAP_SIZE, 5);
 
         // displayMenu = 0;
     } else if (state->menu.displayMenu == MENU_ACHIEVEMENTS) { // Achievements
-        SDL_RenderCopy(state->app.renderer, state->menu.backgroundTexture, NULL, NULL);
+        backgroundMenu(state);
 
         int scrollOffset = 0;
         const int successCount = 10;
@@ -94,7 +89,7 @@ void drawMenu(GameState *state) {
                 50, 
                 50 + 125 * i + 20 * i - scrollOffset, 
                 state->app.screenWidth - 100 - 15, 
-                125
+                125  
             };
             SDL_RenderFillRect(state->app.renderer, &block);
         }
@@ -113,7 +108,8 @@ void drawMenu(GameState *state) {
         // SDL_RenderFillRect(state->app.renderer, &scrollbar);
 
     } else if (state->menu.displayMenu == MENU_SETTINGS) { // Settings
-        
+        backgroundMenu(state);
+
     } else if (state->menu.displayMenu == MENU_BREAK) { // break
         SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, 
             state->graphics.screenBuffers, 

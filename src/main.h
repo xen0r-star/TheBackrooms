@@ -94,8 +94,8 @@ typedef struct {
 typedef struct {
     int mapWidth;
     int mapHeight;
-    int map[MAP_SIZE][MAP_SIZE];
-    int mapDiscovered[MAP_SIZE][MAP_SIZE];
+    int **map;
+    int **mapDiscovered;
     int typeLaunchGame[3];
 } MapState;
 

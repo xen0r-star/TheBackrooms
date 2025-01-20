@@ -1,22 +1,49 @@
 #include "map.h"
 
-void generateMap(int map[MAP_SIZE][MAP_SIZE], int MAP_WIDTH, int MAP_HEIGHT, int percentObstacles) {
-    for (int i = 0; i < MAP_HEIGHT; i++) {
-        for (int j = 0; j < MAP_WIDTH; j++) {
-            if (i == 0 || i == MAP_HEIGHT - 1 || j == 0 || j == MAP_WIDTH - 1) {
-                map[i][j] = 1;
+void initializeMap(MapState *mapState, int width, int height, int percentObstacles) {
+    if (mapState->map != NULL) {
+        for (int i = 0; i < mapState->mapWidth; i++) {
+            free(mapState->map[i]);
+        }
+        free(mapState->map);
+    }
+
+    if (mapState->mapDiscovered != NULL) {
+        for (int i = 0; i < mapState->mapWidth; i++) {
+            free(mapState->mapDiscovered[i]);
+        }
+        free(mapState->mapDiscovered);
+    }
+
+
+    mapState->mapWidth = width;
+    mapState->mapHeight = height;
+
+
+    mapState->map = malloc(width * sizeof(int *));
+    mapState->mapDiscovered = malloc(width * sizeof(int *));
+    for (int i = 0; i < width; i++) {
+        mapState->map[i] = malloc(height * sizeof(int));
+        mapState->mapDiscovered[i] = malloc(height * sizeof(int));
+    }
+
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (i == 0 || i == width - 1 || j == 0 || j == height - 1) {
+                mapState->map[i][j] = 1;
             } else {
-                map[i][j] = 0;
+                mapState->map[i][j] = 0;
             }
+            mapState->mapDiscovered[i][j] = 0;
         }
     }
     
     srand(time(NULL));
-    int numObstacles = (MAP_WIDTH * MAP_HEIGHT) / percentObstacles;
+    int numObstacles = (width * height) / percentObstacles;
 
     for (int k = 0; k < numObstacles; k++) {
-        int x = rand() % (MAP_WIDTH - 2) + 1;
-        int y = rand() % (MAP_HEIGHT - 2) + 1;
-        map[y][x] = 2;
+        int x = rand() % (width - 2) + 1;
+        int y = rand() % (height - 2) + 1;
+        mapState->map[y][x] = 2;
     }
 }
