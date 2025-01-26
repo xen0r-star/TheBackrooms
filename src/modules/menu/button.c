@@ -1,25 +1,32 @@
 #include "menu.h"
 
 bool clickedButton(Button button, int mouseX, int mouseY) {
-    return SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &button.rect);
+    return SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &(SDL_Rect){
+        button.rect.x - button.rect.w / 2, 
+        button.rect.y - button.rect.h / 2, 
+        button.rect.w, 
+        button.rect.h
+    });
 }
 
 
 
 void drawButton(AppState *appState, Button button, ButtonType type) {
-    int x = button.rect.x;
-    int y = button.rect.y;
-    int w = button.rect.w;
-    int h = button.rect.h;
+    SDL_Rect rect = {
+        button.rect.x - button.rect.w / 2, 
+        button.rect.y - button.rect.h / 2, 
+        button.rect.w, 
+        button.rect.h
+    };
 
     if (type == BUTTON_FOCUS) {
         SDL_SetRenderDrawColor(appState->renderer, 255, 255, 255, 255);
-        SDL_RenderFillRect(appState->renderer, &button.rect);
+        SDL_RenderFillRect(appState->renderer, &rect);
 
-        x += 5;
-        y += 5;
-        w -= 10;
-        h -= 10;
+        rect.x += 5;
+        rect.y += 5;
+        rect.w -= 10;
+        rect.h -= 10;
     }
 
     SDL_SetRenderDrawColor(appState->renderer, 
@@ -28,15 +35,16 @@ void drawButton(AppState *appState, Button button, ButtonType type) {
         button.color.b, 
         type == BUTTON_SELECTED || type == BUTTON_FOCUS ? 255 : button.color.a
     );
-    SDL_RenderFillRect(appState->renderer, &(SDL_Rect){x, y, w, h});
+    SDL_RenderFillRect(appState->renderer, &rect);
 
     renderText(
         appState,
-        button.rect.x + (button.rect.w - (int) (strlen(button.text) * 10)) / 2, 
-        button.rect.y + (button.rect.h - (int) (button.rect.h * .75)) / 2 + 5, 
-        (int) (strlen(button.text) * 10), 
-        (int) (button.rect.h * .75) - 10,
-        button.text, (SDL_Color){255, 255, 255, 255}
+        CENTER,
+        button.rect.x, 
+        button.rect.y, 
+        button.text, 
+        (Color){255, 255, 255, 255},
+        TEXT_S
     );
 }
 

@@ -17,9 +17,45 @@
 #define NUMBER_TEXTURES 4                           // Nombre de textures
 #define MAP_SIZE 50                                 // Taille de la map
 
-#define FONT_FILE "font/Roboto-Regular.ttf"         // Fichier de police
-#define BACKGROUND_FILE "image/background.png"      // Fichier de fond menu
+#define FONT_ROBOTO "font/Roboto-Regular.ttf"       // Fichier de police
+#define FONT_JERSEY "font/Jersey25-Regular.ttf"     // Fichier de police
 #define ICON_FILE "image/The_Backrooms_logo.png"    // Fichier d'icône
+
+
+
+// Enum
+typedef enum {
+    TEXT_XS,        // 26
+    TEXT_S,         // 28
+    TEXT_M,         // 32
+    TEXT_L,         // 36
+    TEXT_XL,        // 48
+    TEXT_XXL,       // 72
+    TEXT_TITLE,     // 94
+    TEXT_TYPE_COUNT 
+} TextType;
+
+typedef enum {
+    LEFT,
+    CENTER,
+    RIGHT
+} Alignment;
+
+typedef enum {
+    BUTTON_NORMAL,
+    BUTTON_SELECTED,
+    BUTTON_FOCUS
+} ButtonType;
+
+typedef enum {
+    MENU_NONE,
+    MENU_MAIN,
+    MENU_LOAD,
+    MENU_ACHIEVEMENTS,
+    MENU_SETTINGS,
+    MENU_BREAK
+} MenuType;
+
 
 
 // Structure
@@ -28,15 +64,25 @@ typedef struct {
     float angle;
 } Player;
 
-typedef struct {
-    SDL_Rect rect;
-    SDL_Color color;
-    char *text;
-} Button;
-
 typedef struct{
     int r, g, b, a;
 } Color;
+
+typedef struct {
+    int x, y;
+    int w, h;
+} Rect;
+
+typedef struct {
+    Rect rect;
+    Color color;
+    char *text;
+} Button;
+
+typedef struct {
+    char *family;
+    int size;
+} Font;
 
 
 
@@ -50,8 +96,7 @@ typedef struct {
     SDL_Window         *window;
     const Uint8        *keystate;
     SDL_GameController *controller;
-    TTF_Font           *font;
-    SDL_Texture        *message;
+    TTF_Font           *text[TEXT_TYPE_COUNT];
 
     float fps;
     clock_t startTime;
@@ -77,7 +122,6 @@ typedef struct {
 
 typedef struct {
     int displayMenu;
-    SDL_Texture *backgroundTexture;
 
     Button playButton;
     Button achievementsButton;

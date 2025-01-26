@@ -7,7 +7,7 @@
 
 
 GameState gameState = {
-    .app = {800, 600, true, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0},
+    .app = {800, 600, true, NULL, NULL, NULL, NULL, {NULL}, 0, 0, 0},
     .playerState = {{4.0, 4.0, 0.0}, 150.0, 3.0, 0.0, 0.0, 1, false, false, true, true},
     .menu = {MENU_MAIN},
     .mapState = {MAP_SIZE, MAP_SIZE, NULL, NULL, {0, 0, 0}},
@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
 
     if (initializationWindow(state)  ) return 1;
     if (initializationMenu(state)    ) return 1;
+    if (initializationScreen(state)  ) return 1;
     if (initializationTextures(state)) return 1;
 
     // Boucle principale
@@ -46,10 +47,22 @@ int main(int argc, char *argv[]) {
         }
 
 
+        if (hasWindowResize(&state->app)) {
+            printf("REsize\n");
+            SDL_DestroyTexture(state->graphics.screenBuffersTexture);
+            free(state->graphics.screenBuffers);
+
+            SDL_GetWindowSize(state->app.window, &state->app.screenWidth, &state->app.screenHeight);
+
+            if (initializationScreen(state)) return 1;
+            if (initializationMenu(state))   return 1;
+        }
+
+
         // Nettoyage de l'écran
-        SDL_GetWindowSize(state->app.window, &state->app.screenWidth, &state->app.screenHeight);
         SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255);
         SDL_RenderClear(state->app.renderer);
+
 
         if (state->menu.displayMenu != MENU_NONE) drawMenu(state);
         else {
@@ -68,6 +81,7 @@ int main(int argc, char *argv[]) {
             if (state->playerState.showState) showStateInterface(&state->app, state->playerState);
             if (state->playerState.showMap)   showMapInterface(state->app, state->mapState, state->playerState);
         }
+
 
         // Mise à jour de l'écran
         SDL_RenderPresent(state->app.renderer);

@@ -16,7 +16,7 @@ int initializationWindow(GameState *state) {
     state->app.window = SDL_CreateWindow(WINDOW_TITLE,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          state->app.screenWidth, state->app.screenHeight, SDL_WINDOW_RESIZABLE);
+                                          state->app.screenWidth, state->app.screenHeight, SDL_WINDOW_ALLOW_HIGHDPI);
     if (state->app.window == NULL) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
         SDL_Quit();
@@ -44,10 +44,22 @@ int initializationWindow(GameState *state) {
     SDL_SetWindowIcon(state->app.window, iconSurface);
     SDL_FreeSurface(iconSurface);
 
-    state->app.font = TTF_OpenFont(FONT_FILE, 72);
-    if (!state->app.font) {
-        printf("Erreur lors du chargement de la police: %s\n", TTF_GetError());
-        return 1;
+    Font fontType[TEXT_TYPE_COUNT] = {
+        {FONT_ROBOTO, 26}, 
+        {FONT_ROBOTO, 28}, 
+        {FONT_ROBOTO, 32}, 
+        {FONT_ROBOTO, 36}, 
+        {FONT_ROBOTO, 48}, 
+        {FONT_ROBOTO, 72}, 
+        {FONT_JERSEY, 94}
+    };
+
+    for (int i = 0; i < TEXT_TYPE_COUNT; i++) {
+        state->app.text[i] = TTF_OpenFont(fontType[i].family, fontType[i].size);
+        if (!state->app.text[i]) {
+            printf("Erreur lors du chargement de la police: %s\n", TTF_GetError());
+            return 1;
+        }
     }
 
     SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -87,9 +99,9 @@ int closeWindow(GameState *state) {
 
 
     // Nettoyage de SDL
-    SDL_DestroyTexture(state->menu.backgroundTexture);
-    SDL_DestroyTexture(state->app.message);
-    TTF_CloseFont(state->app.font);
+    for (int i = 0; i < TEXT_TYPE_COUNT; i++) {
+        TTF_CloseFont(state->app.text[i]);
+    }
     
     SDL_DestroyRenderer(state->app.renderer);
     SDL_DestroyWindow(state->app.window);
@@ -100,4 +112,12 @@ int closeWindow(GameState *state) {
     free(state);
 
     return 0;
+}
+
+
+bool hasWindowResize(AppState *appState) {
+    int newWidth, newHeight;
+    SDL_GetWindowSize(appState->window, &newWidth, &newHeight);
+
+    return (newWidth != appState->screenWidth || newHeight != appState->screenHeight);
 }

@@ -7,7 +7,10 @@ void drawMenu(GameState *state) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
     if (state->menu.displayMenu == MENU_MAIN) {
-        backgroundMenu(state);
+        background(state);
+        renderText(&state->app, CENTER, state->app.screenWidth / 2, 100, "ESCAPE", (Color){255, 255, 255, 255}, TEXT_TITLE);
+        renderText(&state->app, CENTER, state->app.screenWidth / 2, 175, "THE BACKROOMS", (Color){255, 255, 255, 255}, TEXT_TITLE);
+
         handleButtons(&state->app, mouseX, mouseY, 4, 
             state->menu.playButton, 
             state->menu.achievementsButton, 
@@ -15,7 +18,7 @@ void drawMenu(GameState *state) {
             state->menu.exitButton
         );
     } else if (state->menu.displayMenu == MENU_LOAD) { // Load
-        backgroundMenu(state);
+        background(state);
         SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
 
         // for (int i = 0; i < 3; i++) {
@@ -75,7 +78,7 @@ void drawMenu(GameState *state) {
 
         // displayMenu = 0;
     } else if (state->menu.displayMenu == MENU_ACHIEVEMENTS) { // Achievements
-        backgroundMenu(state);
+        background(state);
 
         int scrollOffset = 0;
         const int successCount = 10;
@@ -83,16 +86,16 @@ void drawMenu(GameState *state) {
         const int viewHeight = state->app.screenHeight - 50;
 
         // Elements
-        SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
-        for (int i = 0; i < successCount; i++) {
-            SDL_Rect block = {
-                50, 
-                50 + 125 * i + 20 * i - scrollOffset, 
-                state->app.screenWidth - 100 - 15, 
-                125  
-            };
-            SDL_RenderFillRect(state->app.renderer, &block);
-        }
+        // SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
+        // for (int i = 0; i < successCount; i++) {
+        //     SDL_Rect block = {
+        //         50, 
+        //         50 + 125 * i + 20 * i - scrollOffset, 
+        //         state->app.screenWidth - 100 - 15, 
+        //         125  
+        //     };
+        //     SDL_RenderFillRect(state->app.renderer, &block);
+        // }
 
         // SDL_SetRenderDrawColor(state->app.renderer, 200, 200, 200, 240);
         // SDL_Rect scrollbar = {state->app.screenWidth - 30, 50, 10, viewHeight - 10};
@@ -108,7 +111,7 @@ void drawMenu(GameState *state) {
         // SDL_RenderFillRect(state->app.renderer, &scrollbar);
 
     } else if (state->menu.displayMenu == MENU_SETTINGS) { // Settings
-        backgroundMenu(state);
+        background(state);
 
     } else if (state->menu.displayMenu == MENU_BREAK) { // break
         SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, 

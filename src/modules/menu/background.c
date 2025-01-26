@@ -1,9 +1,9 @@
-#include "utils.h"
+#include "menu.h"
 
-void backgroundMenu(GameState *state) {
+void background(GameState *state) {
     static int mapGenerated = false;
 
-    static PlayerState staticPlayerState = {{4.0, 4.0, 0.0}, 0.0, 0.0, 0.0, 0.0, 1, false, false, true, true};
+    static PlayerState staticPlayerState = {{5.0, 5.0, 0.0}, 0.0, 0.0, 0.0, 0.0, 1, false, false, true, true};
     static MapState staticMapState = {10, 10, NULL, NULL, {0, 0, 0}};
 
     if (!mapGenerated) {
