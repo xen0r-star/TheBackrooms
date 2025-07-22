@@ -44,7 +44,7 @@ typedef enum {
 typedef enum {
     BUTTON_NORMAL,
     BUTTON_SELECTED,
-    BUTTON_FOCUS
+    BUTTON_HOVER
 } ButtonType;
 
 typedef enum {
@@ -55,6 +55,12 @@ typedef enum {
     MENU_SETTINGS,
     MENU_BREAK
 } MenuType;
+
+typedef enum {
+    BACKGROUND_MENU,
+    BACKGROUND_GAME,
+    BAKCGROUND_TYPE_COUNT
+} BackgroundType;
 
 
 
@@ -122,6 +128,8 @@ typedef struct {
 
 typedef struct {
     int displayMenu;
+    BackgroundType backgroundType;
+    int scrollOffset;
 
     Button playButton;
     Button achievementsButton;
@@ -133,6 +141,7 @@ typedef struct {
     Button loadGame2;
     Button loadGame3;
     Button launchGame;
+    Button returnButton;
 } MenuState;
 
 typedef struct {
@@ -140,7 +149,7 @@ typedef struct {
     int mapHeight;
     int **map;
     int **mapDiscovered;
-    int typeLaunchGame[3];
+    int typeLaunchGame;
 } MapState;
 
 typedef struct {

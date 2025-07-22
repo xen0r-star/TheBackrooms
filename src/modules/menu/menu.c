@@ -7,7 +7,7 @@ void drawMenu(GameState *state) {
     SDL_GetMouseState(&mouseX, &mouseY);
 
     if (state->menu.displayMenu == MENU_MAIN) {
-        background(state);
+        background(state, state->menu.backgroundType);
         renderText(&state->app, CENTER, state->app.screenWidth / 2, 100, "ESCAPE", (Color){255, 255, 255, 255}, TEXT_TITLE);
         renderText(&state->app, CENTER, state->app.screenWidth / 2, 175, "THE BACKROOMS", (Color){255, 255, 255, 255}, TEXT_TITLE);
 
@@ -17,8 +17,9 @@ void drawMenu(GameState *state) {
             state->menu.settingsButton, 
             state->menu.exitButton
         );
+
     } else if (state->menu.displayMenu == MENU_LOAD) { // Load
-        background(state);
+        background(state, state->menu.backgroundType);
         SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
 
         // for (int i = 0; i < 3; i++) {
@@ -65,38 +66,36 @@ void drawMenu(GameState *state) {
             state->menu.loadGame3.text = "Nouvelle Partie";
         }
 
-        drawButton(&state->app, state->menu.loadGame1, state->mapState.typeLaunchGame[0]);
-        drawButton(&state->app, state->menu.loadGame2, state->mapState.typeLaunchGame[1]);
-        drawButton(&state->app, state->menu.loadGame3, state->mapState.typeLaunchGame[2]);   
+        drawButton(&state->app, state->menu.loadGame1, state->mapState.typeLaunchGame == 1 ? BUTTON_SELECTED : BUTTON_NORMAL);
+        drawButton(&state->app, state->menu.loadGame2, state->mapState.typeLaunchGame == 2 ? BUTTON_SELECTED : BUTTON_NORMAL);
+        drawButton(&state->app, state->menu.loadGame3, state->mapState.typeLaunchGame == 3 ? BUTTON_SELECTED : BUTTON_NORMAL);   
         drawButton(&state->app, state->menu.launchGame, BUTTON_NORMAL);    
-
-        state->mapState.typeLaunchGame[0] = BUTTON_NORMAL;
-        state->mapState.typeLaunchGame[1] = BUTTON_NORMAL;
-        state->mapState.typeLaunchGame[2] = BUTTON_NORMAL; 
 
         initializeMap(&state->mapState, MAP_SIZE, MAP_SIZE, 5);
 
         // displayMenu = 0;
     } else if (state->menu.displayMenu == MENU_ACHIEVEMENTS) { // Achievements
-        background(state);
-
-        int scrollOffset = 0;
+        background(state, state->menu.backgroundType);
+        
         const int successCount = 10;
         const int contentHeight = successCount * 125 + (successCount - 1) * 20;
         const int viewHeight = state->app.screenHeight - 50;
 
-        // Elements
-        // SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
-        // for (int i = 0; i < successCount; i++) {
-        //     SDL_Rect block = {
-        //         50, 
-        //         50 + 125 * i + 20 * i - scrollOffset, 
-        //         state->app.screenWidth - 100 - 15, 
-        //         125  
-        //     };
-        //     SDL_RenderFillRect(state->app.renderer, &block);
-        // }
 
+        // Elements
+        SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
+        for (int i = 0; i < successCount; i++) {
+            SDL_Rect block = {
+                60, 
+                100 + 125 * i + 20 * i - state->menu.scrollOffset, 
+                state->app.screenWidth - 120, 
+                125  
+            };
+            SDL_RenderFillRect(state->app.renderer, &block);
+        }
+
+
+        // Scrollbar
         // SDL_SetRenderDrawColor(state->app.renderer, 200, 200, 200, 240);
         // SDL_Rect scrollbar = {state->app.screenWidth - 30, 50, 10, viewHeight - 10};
         // SDL_RenderFillRect(state->app.renderer, &scrollbar);
@@ -110,19 +109,27 @@ void drawMenu(GameState *state) {
         // };
         // SDL_RenderFillRect(state->app.renderer, &scrollbar);
 
+        // drawButton(&state->app, state->menu.returnButton, BUTTON_NORMAL);
+
+
+        // Header
+        SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255);
+        SDL_Rect block = {60, 20, state->app.screenWidth - 120, 50};
+        SDL_RenderFillRect(state->app.renderer, &block);
+
+        renderText(&state->app, LEFT, 120, 45, "Succes", (Color){255, 255, 255, 255}, TEXT_S);
+        renderText(&state->app, RIGHT, state->app.screenWidth - 60 - 20, 45, "0 / 25", (Color){255, 255, 255, 255}, TEXT_XS);
+
     } else if (state->menu.displayMenu == MENU_SETTINGS) { // Settings
-        background(state);
+        background(state, state->menu.backgroundType);
+        if (state->menu.backgroundType == BACKGROUND_MENU) {
+            
+        }
+
+        drawButton(&state->app, state->menu.returnButton, BUTTON_NORMAL);
 
     } else if (state->menu.displayMenu == MENU_BREAK) { // break
-        SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, 
-            state->graphics.screenBuffers, 
-            state->app.screenWidth * sizeof(Uint32)
-        );
-        SDL_RenderCopy(state->app.renderer, state->graphics.screenBuffersTexture, NULL, NULL);
-
-        SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 190);
-        SDL_Rect block = {0, 0, state->app.screenWidth, state->app.screenHeight};
-        SDL_RenderFillRect(state->app.renderer, &block);
+        background(state, state->menu.backgroundType);
 
         handleButtons(&state->app, mouseX, mouseY, 4, 
             state->menu.resumeGameButton, 

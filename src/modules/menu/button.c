@@ -19,7 +19,7 @@ void drawButton(AppState *appState, Button button, ButtonType type) {
         button.rect.h
     };
 
-    if (type == BUTTON_FOCUS) {
+    if (type == BUTTON_SELECTED) {
         SDL_SetRenderDrawColor(appState->renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(appState->renderer, &rect);
 
@@ -33,7 +33,7 @@ void drawButton(AppState *appState, Button button, ButtonType type) {
         button.color.r, 
         button.color.g, 
         button.color.b, 
-        type == BUTTON_SELECTED || type == BUTTON_FOCUS ? 255 : button.color.a
+        type == BUTTON_HOVER ? 255 : button.color.a
     );
     SDL_RenderFillRect(appState->renderer, &rect);
 
@@ -60,7 +60,7 @@ void handleButtons(AppState *appState, int mouseX, int mouseY, int buttonCount, 
 
         if (clickedButton(button, mouseX, mouseY)) {
             cursorChanged = true;
-            drawButton(appState, button, BUTTON_SELECTED);
+            drawButton(appState, button, BUTTON_HOVER);
         } else {
             drawButton(appState, button, BUTTON_NORMAL);
         }
@@ -70,4 +70,67 @@ void handleButtons(AppState *appState, int mouseX, int mouseY, int buttonCount, 
     else               SDL_SetCursor(SDL_GetDefaultCursor());
 
     va_end(buttons);
+}
+
+
+void handleMenuButtons(GameState *state, int mouseX, int mouseY) {
+    int displayMenu = state->menu.displayMenu;
+
+    switch (displayMenu) {
+        case MENU_MAIN:
+            if (clickedButton(state->menu.playButton, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_LOAD;
+            } else if (clickedButton(state->menu.achievementsButton, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_ACHIEVEMENTS;
+            } else if (clickedButton(state->menu.settingsButton, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_SETTINGS;
+            } else if (clickedButton(state->menu.exitButton, mouseX, mouseY)) {
+                state->app.running = false;
+            }
+            break;
+        
+        case MENU_LOAD:
+            if (clickedButton(state->menu.loadGame1, mouseX, mouseY)) {
+                state->mapState.typeLaunchGame = 1;
+            } else if (clickedButton(state->menu.loadGame2, mouseX, mouseY)) {
+                state->mapState.typeLaunchGame = 2;
+            } else if (clickedButton(state->menu.loadGame3, mouseX, mouseY)) {
+                state->mapState.typeLaunchGame = 3; 
+            } else if (clickedButton(state->menu.launchGame, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_NONE;
+                state->menu.backgroundType = BACKGROUND_GAME;
+            } else if (clickedButton(state->menu.returnButton, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_MAIN;
+            }
+            break;
+
+        case MENU_ACHIEVEMENTS:
+            if (clickedButton(state->menu.returnButton, mouseX, mouseY)) {
+                state->menu.displayMenu = state->menu.backgroundType == BACKGROUND_GAME ? MENU_BREAK : MENU_MAIN;
+            }
+            break;
+        
+        case MENU_SETTINGS:
+            if (clickedButton(state->menu.returnButton, mouseX, mouseY)) {
+                state->menu.displayMenu = state->menu.backgroundType == BACKGROUND_GAME ? MENU_BREAK : MENU_MAIN;
+            }
+            break;
+        
+        case MENU_BREAK:
+            if (clickedButton(state->menu.resumeGameButton, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_NONE;
+            } else if (clickedButton(state->menu.achievementsButton, mouseX, mouseY)) { 
+                state->menu.displayMenu = MENU_ACHIEVEMENTS;
+            } else if (clickedButton(state->menu.settingsButton, mouseX, mouseY)) {     
+                state->menu.displayMenu = MENU_SETTINGS;
+            } else if (clickedButton(state->menu.exitGameButton, mouseX, mouseY)) {
+                state->menu.displayMenu = MENU_MAIN;
+                state->menu.backgroundType = BACKGROUND_MENU;
+                saveData(state, "Save1");
+            }
+            break;
+        
+        default:
+            break;
+    }
 }

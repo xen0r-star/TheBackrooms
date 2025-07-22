@@ -2,6 +2,7 @@
 
 int initializationMenu(GameState *state) {
     int screenWidth = state->app.screenWidth;
+    int screenHeight = state->app.screenHeight;
 
     state->menu.playButton = (Button){
         {screenWidth / 2, 300 + 0 * (50 + 20), 400, 50},
@@ -62,6 +63,12 @@ int initializationMenu(GameState *state) {
         {screenWidth / 2, 100 + 145 * 3, screenWidth - 120, 100}, 
         {0, 0, 0, 255},
         "Start Game"
+    };
+
+    state->menu.returnButton = (Button) {
+        {screenWidth / 2, screenHeight - 25 - 20, screenWidth - 120, 50}, 
+        {0, 0, 0, 255},
+        "Retourner"
     };
 
     return 0;
