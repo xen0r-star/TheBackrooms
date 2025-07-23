@@ -74,9 +74,9 @@ int initializationWindow(GameState *state) {
             }
         }
 
-        if (state->app.controller == NULL) {
-            printf("Could not open gamecontroller! SDL_Error: %s\n", SDL_GetError());
-        }
+        // if (state->app.controller == NULL) {
+        //     printf("Could not open gamecontroller! SDL_Error: %s\n", SDL_GetError());
+        // }
     }
 
     return 0;

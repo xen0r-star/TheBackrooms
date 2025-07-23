@@ -8,7 +8,7 @@ void background(GameState *state, BackgroundType backgroundType) {
         static MapState staticMapState = {10, 10, NULL, NULL, 0};
 
         if (!mapGenerated) {
-            initializeMap(&staticMapState, staticMapState.mapWidth, staticMapState.mapHeight, 5);
+            generateMap(&staticMapState, staticMapState.mapWidth, staticMapState.mapHeight);
             mapGenerated = true;
         }
 

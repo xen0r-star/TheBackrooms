@@ -5,18 +5,35 @@ void showMapInterface(const AppState appState, const MapState mapState, const Pl
     int screenWidth = appState.screenWidth;
     int screenHeight = appState.screenHeight;
 
-    int drawSize = (screenHeight * 0.4) / mapState.mapHeight;
-    float increment = ((1.5 - 1.0) / (mapState.mapHeight - 1));
+    int windowWidth = mapState.mapWidth;
+    int windowHeight = mapState.mapHeight;
 
-    for (int y = 0; y < 60; y++) {
+    int drawSize = (screenHeight * 0.4) / windowHeight;
+
+    float increment = ((1.5 - 1.0) / (windowHeight - 1));
+
+    int playerX = (int)playerState.player.x;
+    int playerY = (int)playerState.player.y;
+
+    // Calcul du début de la fenêtre autour du joueur
+    int startX = playerX - windowWidth / 2;
+    int startY = playerY - windowHeight / 2;
+
+    if (startX < 0) startX = 0;
+    if (startY < 0) startY = 0;
+    if (startX + windowWidth > mapState.mapWidth)  startX = mapState.mapWidth  - windowWidth;
+    if (startY + windowHeight > mapState.mapHeight) startY = mapState.mapHeight - windowHeight;
+    if (startX < 0) startX = 0;
+    if (startY < 0) startY = 0;
+
+    // === Dessin du fond ===
+    for (int y = 0; y < windowHeight; y++) {
         float deformation = 1.0 + y * increment;
-
-        for (int x = 0; x < 70; x++) {
+        for (int x = 0; x < windowWidth; x++) {
             SDL_SetRenderDrawColor(renderer, 220, 180, 120, 255);
-
             SDL_Rect mapRect = {
-                ((screenWidth - drawSize * deformation * 70) / 2) + x * drawSize * deformation,
-                (screenHeight - drawSize * 60 - 25) + y * drawSize,
+                ((screenWidth - drawSize * deformation * windowWidth) / 2) + x * drawSize * deformation,
+                (screenHeight - drawSize * windowHeight - 25) + y * drawSize,
                 drawSize * deformation + 1,
                 drawSize
             };
@@ -24,13 +41,15 @@ void showMapInterface(const AppState appState, const MapState mapState, const Pl
         }
     }
 
-
-    for (int y = 0; y < mapState.mapHeight; y++) {
+    // === Dessin de la carte visible ===
+    for (int y = 0; y < windowHeight; y++) {
         float deformation = 1.0 + y * increment;
+        for (int x = 0; x < windowWidth; x++) {
+            int mapX = startX + x;
+            int mapY = startY + y;
 
-        for (int x = 0; x < mapState.mapWidth; x++) {
-            if (mapState.mapDiscovered[y][x] == 1) {
-                switch (mapState.map[y][x]) {
+            if (mapState.mapDiscovered[mapY][mapX] == 1) {
+                switch (mapState.map[mapY][mapX]) {
                     case 1:  SDL_SetRenderDrawColor(renderer,  54,  43,  26, 255); break;
                     case 2:  SDL_SetRenderDrawColor(renderer,  92,  70,  37, 255); break;
                     case 3:  SDL_SetRenderDrawColor(renderer,  92,  70,  37, 255); break;
@@ -40,23 +59,24 @@ void showMapInterface(const AppState appState, const MapState mapState, const Pl
                 }
 
                 SDL_Rect block = {
-                    ((screenWidth - drawSize * deformation * mapState.mapWidth) / 2) + x * drawSize * deformation,  // X
-                    (screenHeight - drawSize * mapState.mapHeight - 35) + y * drawSize,                             // Y
-                    drawSize * deformation + 1,                                                                     // W
-                    drawSize                                                                                        // H
+                    ((screenWidth - drawSize * deformation * windowWidth) / 2) + x * drawSize * deformation,
+                    (screenHeight - drawSize * windowHeight - 25) + y * drawSize,
+                    drawSize * deformation + 1,
+                    drawSize
                 };
                 SDL_RenderFillRect(renderer, &block);
             }
         }
     }
 
-    float deformation = 1.0 + playerState.player.y * increment;
+    // === Dessin du joueur dans la fenêtre ===
+    float deformation = 1.0 + (playerY - startY) * increment;
 
     SDL_SetRenderDrawColor(renderer, 196, 65, 65, 255);
-    SDL_Rect playerRect = { 
-        ((screenWidth - drawSize * deformation * mapState.mapWidth) / 2) + playerState.player.x * drawSize * deformation, 
-        (screenHeight - drawSize * mapState.mapHeight - 35) + playerState.player.y * drawSize, 
-        4, 4 
+    SDL_Rect playerRect = {
+        ((screenWidth - drawSize * deformation * windowWidth) / 2) + (playerX - startX) * drawSize * deformation,
+        (screenHeight - drawSize * windowHeight - 25) + (playerY - startY) * drawSize,
+        4, 4
     };
     SDL_RenderFillRect(renderer, &playerRect);
 }

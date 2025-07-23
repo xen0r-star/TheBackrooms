@@ -1,5 +1,7 @@
 #include "graphics.h"
 
+#define PI 3.14159265358979323846
+
 void renderTexturedWall(const AppState appState, const PlayerState playerState, GraphicsBuffers *graphicsBuffers, int x, float rayAngle, float distance, int wallType, int wallSide, int wallHeight, int drawStart, int drawEnd);
 void renderTexturedFloor(const AppState appState, GraphicsBuffers *graphicsBuffers, int y, float floorX, float floorY, float floorStepX, float floorStepY);
 void renderColoredWall(const AppState appState, GraphicsBuffers *graphicsBuffers, int x, float distance, int wallType, int wallSide, int wallHeight, int drawStart);
@@ -11,8 +13,8 @@ void renderScene(GameState *state) {
 
     if (state->playerState.showTextures) {
         for (int y = state->app.screenHeight / 2 + 1; y < state->app.screenHeight; y++) { // sol et plafond
-            float angleRadians0 = (state->playerState.player.angle - (state->settings.fov / 2.0)) * (M_PI / 180.0);
-            float angleRadians1 = (state->playerState.player.angle + (state->settings.fov / 2.0)) * (M_PI / 180.0);
+            float angleRadians0 = (state->playerState.player.angle - (state->settings.fov / 2.0)) * (PI / 180.0);
+            float angleRadians1 = (state->playerState.player.angle + (state->settings.fov / 2.0)) * (PI / 180.0);
 
             float rayDirX0 = cos(angleRadians0);
             float rayDirY0 = sin(angleRadians0);
@@ -36,7 +38,7 @@ void renderScene(GameState *state) {
         for (int x = 0; x < state->app.screenWidth; x++) { // murs
             float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) 
                              + ((float)x / (float)state->app.screenWidth) * state->settings.fov) 
-                             * (M_PI / 180); // Angle du rayon
+                             * (PI / 180); // Angle du rayon
             float distance;
             int wallType, wallSide;
 
@@ -49,13 +51,19 @@ void renderScene(GameState *state) {
             if (drawStart < 0) drawStart = 0;                         
             if (drawEnd >= state->app.screenHeight) drawEnd = state->app.screenHeight - 1;
 
+            // glitchEffect(state->app, &state->graphics, 1);
+
+
+            if (wallType == 9) 
+                wallType = 0;
+
             renderTexturedWall(state->app, state->playerState, &state->graphics, x, rayAngle, distance, wallType, wallSide, wallHeight, drawStart, drawEnd);
         }
     } else {
         for (int x = 0; x < state->app.screenWidth; x++) {
             float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) 
                              + ((float)x / (float)state->app.screenWidth) * state->settings.fov)
-                             * (M_PI / 180);  // Angle du rayon
+                             * (PI / 180);  // Angle du rayon
             float distance;
             int wallType, wallSide;
 
@@ -112,7 +120,8 @@ void renderTexturedWall(const AppState appState, const PlayerState playerState, 
         Uint8 b = ((pixel >> 8 ) & 0xFF) / (wallSide == 1 ? 2 : 1);
         Uint8 a = pixel & 0xFF;
 
-        float fogFactor = fmin(distance / 60.0, 0.5);
+        float fogFactor = fmin(distance / 30.0, 0.5);
+        fogFactor = powf(fogFactor, 2.0f);
 
         r = (Uint8)((1 - fogFactor) * r + fogFactor * 0);
         g = (Uint8)((1 - fogFactor) * g + fogFactor * 0);

@@ -71,15 +71,16 @@ void drawMenu(GameState *state) {
         drawButton(&state->app, state->menu.loadGame3, state->mapState.typeLaunchGame == 3 ? BUTTON_SELECTED : BUTTON_NORMAL);   
         drawButton(&state->app, state->menu.launchGame, BUTTON_NORMAL);    
 
-        initializeMap(&state->mapState, MAP_SIZE, MAP_SIZE, 5);
+        generateMap(&state->mapState, MAP_SIZE_LEVEL0, MAP_SIZE_LEVEL0);
+        spawnPlayerFromMap(&state->playerState, &state->mapState);
 
         // displayMenu = 0;
     } else if (state->menu.displayMenu == MENU_ACHIEVEMENTS) { // Achievements
         background(state, state->menu.backgroundType);
         
         const int successCount = 10;
-        const int contentHeight = successCount * 125 + (successCount - 1) * 20;
-        const int viewHeight = state->app.screenHeight - 50;
+        // const int contentHeight = successCount * 125 + (successCount - 1) * 20;
+        // const int viewHeight = state->app.screenHeight - 50;
 
 
         // Elements

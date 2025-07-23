@@ -15,7 +15,7 @@
 #define WINDOW_TITLE "ESCAPE THE BACKROOMS"         // Titre de la fenêtre
 #define TEXTURE_SIZE 64                             // Taille des textures
 #define NUMBER_TEXTURES 4                           // Nombre de textures
-#define MAP_SIZE 50                                 // Taille de la map
+#define MAP_SIZE_LEVEL0 6                           // Nombre de salles dans le niveau 0
 
 #define FONT_ROBOTO "font/Roboto-Regular.ttf"       // Fichier de police
 #define FONT_JERSEY "font/Jersey25-Regular.ttf"     // Fichier de police

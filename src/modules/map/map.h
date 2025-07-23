@@ -2,7 +2,20 @@
 #define map_H
 
 #include "../../main.h"
+#include <stdlib.h>
+#include <time.h>
+#include <stdbool.h>
 
-extern void initializeMap(MapState *mapState, int width, int height, int percentObstacles);
+
+typedef struct {
+    int width;
+    int height;
+    const char** tiles;
+    int maxOccurrences;
+} RoomPattern;
+
+
+extern void generateMap(MapState *mapState, int width, int height);
+extern void spawnPlayerFromMap(PlayerState *playerState, MapState *mapState);
 
 #endif

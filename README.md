@@ -10,7 +10,7 @@
   ![Status](https://img.shields.io/badge/status-active-success.svg)
   [![GitHub Issues](https://img.shields.io/github/issues/xen0r-star/TheBackrooms.svg)](https://github.com/xen0r-star/TheBackrooms/issues)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xen0r-star/TheBackrooms/blob/main/LICENSE)
-  ![Version](https://img.shields.io/badge/version-beta_0.5.1-blue.svg)
+  ![Version](https://img.shields.io/badge/version-beta_0.5.2-blue.svg)
 
 </div>
 
@@ -56,6 +56,7 @@ You have two options to get the game running:
 
 1. **Prerequisites**
   - C Compiler *(GCC or MinGW for Windows)*
+  - Make *(install with `pacman -S make` if using MSYS2)*
   - Git *(for cloning the repository)*
 
 2. **Clone the repository**
