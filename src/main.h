@@ -71,8 +71,15 @@ typedef struct {
 } Player;
 
 typedef struct {
+    float transparency;
+    float moveY;
+} transform_Sprite;
+    
+typedef struct {
     double x, y;
+    float scaleX, scaleY;
     int texture_id;
+    transform_Sprite transform;
 } Sprite;
 
 typedef struct{

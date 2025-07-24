@@ -8,7 +8,7 @@ int initializationTextures(GameState *state) {
         "textures/floor.png",
         "textures/ceiling.png",
         
-        "textures/barrel.png"
+        "textures/e1.png"
     };
 
     state->graphics.textureBuffers = (Uint32**)malloc(NUMBER_TEXTURES * sizeof(Uint32*));

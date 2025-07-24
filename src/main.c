@@ -34,14 +34,17 @@ int main(int argc, char *argv[]) {
 
     state->entityState.numSprites = 1;
 
-        // Allocation dynamique
+    // Allocation dynamique pour 3 sprites
     state->entityState.sprites = malloc(sizeof(Sprite) * state->entityState.numSprites);
 
-    // Initialisation du sprite
+    // Initialisation des sprites
     state->entityState.sprites[0].x = 4.0;
     state->entityState.sprites[0].y = 4.0;
+    state->entityState.sprites[0].scaleX = 0.8f;
+    state->entityState.sprites[0].scaleY = 0.8f;
     state->entityState.sprites[0].texture_id = 4;
-
+    state->entityState.sprites[0].transform.transparency = 1.0f;
+    state->entityState.sprites[0].transform.moveY = -64.0f;
 
 
 

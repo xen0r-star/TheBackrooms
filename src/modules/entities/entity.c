@@ -43,7 +43,14 @@ void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zB
         }
     }
 
+
     for (int i = 0; i < numSprites; i++) {
+        float vDiv = sprites[spriteOrder[i]].scaleY;
+        float uDiv = sprites[spriteOrder[i]].scaleX;
+        float vMove = sprites[spriteOrder[i]].transform.moveY;
+        float transparency = sprites[spriteOrder[i]].transform.transparency;
+
+
         double spriteX = sprites[spriteOrder[i]].x - posX;
         double spriteY = sprites[spriteOrder[i]].y - posY;
 
@@ -53,14 +60,17 @@ void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zB
         double transformY = invDet * (-planeY * spriteX + planeX * spriteY);
 
         int spriteScreenX = (int)((w / 2) * (1 + transformX / transformY));
+        int vMoveScreen = (int)(-vMove / transformY);
 
-        int spriteHeight = abs((int)(h / transformY));
-        int drawStartY = -spriteHeight / 2 + h / 2;
+        if (vDiv == 0) vDiv = 1; 
+        int spriteHeight = abs((int)(h / transformY)) / (1.0f / vDiv);
+        int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen;
         if (drawStartY < 0) drawStartY = 0;
-        int drawEndY = spriteHeight / 2 + h / 2;
+        int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen;
         if (drawEndY >= h) drawEndY = h - 1;
 
-        int spriteWidth = abs((int)(h / transformY));
+        if (uDiv == 0) uDiv = 1; 
+        int spriteWidth = abs((int)(h / transformY)) / (1.0f / uDiv);
         int drawStartX = -spriteWidth / 2 + spriteScreenX;
         if (drawStartX < 0) drawStartX = 0;
         int drawEndX = spriteWidth / 2 + spriteScreenX;
@@ -71,18 +81,38 @@ void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zB
 
             if (transformY > 0 && stripe >= 0 && stripe < w && transformY < zBuffer[stripe]) {
                 for (int y = drawStartY; y < drawEndY; y++) {
-                    int d = (y) * 256 - h * 128 + spriteHeight * 128;
+                    int d = (y - vMoveScreen) * 256 - h * 128 + spriteHeight * 128;
                     int texY = ((d * TEXTURE_SIZE) / spriteHeight) / 256;
 
                     Uint32 pixel = state->graphics.textureBuffers[sprites[spriteOrder[i]].texture_id][TEXTURE_SIZE * texY + texX];
                     
-                    if ((pixel >> 24) > 0) {
-                        Uint8 r = ((pixel >> 24) & 0xFF) / 2;
-                        Uint8 g = ((pixel >> 16) & 0xFF) / 2;
-                        Uint8 b = ((pixel >> 8 ) & 0xFF) / 2;
-                        Uint8 a = pixel & 0xFF;
+                    Uint8 originalA = pixel & 0xFF;
+                    if (originalA > 0) {
+                        if (transparency >= 1.0f || transparency <= 0.0f) {
+                            Uint8 r = ((pixel >> 24) & 0xFF) / 2;
+                            Uint8 g = ((pixel >> 16) & 0xFF) / 2;
+                            Uint8 b = ((pixel >> 8 ) & 0xFF) / 2;
+                            
+                            state->graphics.screenBuffers[y * w + stripe] = (0xFF << 24) | (r << 16) | (g << 8) | b;
 
-                        state->graphics.screenBuffers[y * w + stripe] = (a << 24) | (r << 16) | (g << 8) | b;
+                        } else {
+                            Uint8 r = ((pixel >> 24) & 0xFF) / 2;
+                            Uint8 g = ((pixel >> 16) & 0xFF) / 2;
+                            Uint8 b = ((pixel >> 8 ) & 0xFF) / 2;
+    
+                            // Lire la couleur du fond
+                            Uint32 bgPixel = state->graphics.screenBuffers[y * w + stripe];
+                            Uint8 bgR = (bgPixel >> 16) & 0xFF;
+                            Uint8 bgG = (bgPixel >> 8)  & 0xFF;
+                            Uint8 bgB = bgPixel & 0xFF;
+    
+                            // Mélange RGB avec fond
+                            Uint8 finalR = (Uint8)(r * transparency + bgR * (1.0f - transparency));
+                            Uint8 finalG = (Uint8)(g * transparency + bgG * (1.0f - transparency));
+                            Uint8 finalB = (Uint8)(b * transparency + bgB * (1.0f - transparency));
+    
+                            state->graphics.screenBuffers[y * w + stripe] = (0xFF << 24) | (finalR << 16) | (finalG << 8) | finalB;
+                        }
                     }
                 }
             }
