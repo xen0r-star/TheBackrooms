@@ -5,15 +5,15 @@ void itemFrame(const AppState appState, int selectFrame) {
     int screenWidth = appState.screenWidth;
     int screenHeight = appState.screenHeight;
 
-    SDL_Surface *frameSurface = IMG_Load("textures/frame.png");
-    if (!frameSurface) {
+    SDL_Surface *inventoryBarSurface = IMG_Load("textures/inventoryBar.png");
+    if (!inventoryBarSurface) {
         printf("Erreur lors du chargement de l'image : %s\n", IMG_GetError());
         return;
     }
 
-    SDL_Texture *frameTexture = SDL_CreateTextureFromSurface(renderer, frameSurface);
-    SDL_FreeSurface(frameSurface);
-    if (!frameTexture) {
+    SDL_Texture *inventoryBar = SDL_CreateTextureFromSurface(renderer, inventoryBarSurface);
+    SDL_FreeSurface(inventoryBarSurface);
+    if (!inventoryBar) {
         printf("Erreur lors de la création de la texture : %s\n", SDL_GetError());
         return;
     }
@@ -25,29 +25,29 @@ void itemFrame(const AppState appState, int selectFrame) {
         return;
     }
 
-    SDL_Texture *frameSelectTexture = SDL_CreateTextureFromSurface(renderer, frameSelectSurface);
+    SDL_Texture *frameSelect = SDL_CreateTextureFromSurface(renderer, frameSelectSurface);
     SDL_FreeSurface(frameSelectSurface);
-    if (!frameSelectTexture) {
+    if (!frameSelect) {
         printf("Erreur lors de la création de la texture : %s\n", SDL_GetError());
         return;
     }
 
+    
+    SDL_RenderCopy(renderer, inventoryBar, NULL, &(SDL_Rect) {
+        (screenWidth - 358) / 2, 
+        screenHeight - 64 - 20, 
+        358, 
+        64 
+    });
 
-    for (int i = 0; i < 5; i++) {
-        SDL_Rect destRect = { 
-            ((screenWidth - 5 * 50) / 2) + i * 50, 
-            screenHeight - 50 - 10, 
-            50, 
-            50 
-        };
+    SDL_RenderCopy(renderer, frameSelect, NULL, &(SDL_Rect) {
+        ((screenWidth - 358) / 2) + 49 * (selectFrame - 1), 
+        screenHeight - 64 - 20, 
+        64, 
+        64 
+    });
+    
 
-        if (i + 1 == selectFrame) {
-            SDL_RenderCopy(renderer, frameSelectTexture, NULL, &destRect);
-        } else {
-            SDL_RenderCopy(renderer, frameTexture, NULL, &destRect);
-        }
-    }
-
-    SDL_DestroyTexture(frameTexture);
-    SDL_DestroyTexture(frameSelectTexture);
+    SDL_DestroyTexture(inventoryBar);
+    SDL_DestroyTexture(frameSelect);
 }

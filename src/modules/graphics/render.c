@@ -12,25 +12,27 @@ void renderScene(GameState *state) {
     // Dessin des colonnes de murs
 
     if (state->playerState.showTextures) {
-        for (int y = state->app.screenHeight / 2 + 1; y < state->app.screenHeight; y++) { // sol et plafond
-            float angleRadians0 = (state->playerState.player.angle - (state->settings.fov / 2.0)) * (PI / 180.0);
-            float angleRadians1 = (state->playerState.player.angle + (state->settings.fov / 2.0)) * (PI / 180.0);
+        
+        float posZ = 0.5 * state->app.screenHeight;
 
-            float rayDirX0 = cos(angleRadians0);
-            float rayDirY0 = sin(angleRadians0);
-            float rayDirX1 = cos(angleRadians1);
-            float rayDirY1 = sin(angleRadians1);
+        // Angle centre caméra en radians
+        float dirAngle = state->playerState.player.angle * PI / 180.0;
+        float dirX = cos(dirAngle);
+        float dirY = sin(dirAngle);
 
+        // Plan de caméra (perpendiculaire à direction)
+        float planeX = -dirY * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
+        float planeY =  dirX * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
 
+        for (int y = state->app.screenHeight / 2 + 1; y < state->app.screenHeight; y++) {
             int p = y - state->app.screenHeight / 2;
-            float posZ = 0.5 * state->app.screenHeight;
-            float rowDistance = posZ / p;
+            float rowDistance = posZ / (float)p;
 
-            float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / state->app.screenWidth;
-            float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / state->app.screenWidth;
+            float floorStepX = rowDistance * (planeX * 2) / state->app.screenWidth;
+            float floorStepY = rowDistance * (planeY * 2) / state->app.screenWidth;
 
-            float floorX = state->playerState.player.x + rowDistance * rayDirX0;
-            float floorY = state->playerState.player.y + rowDistance * rayDirY0;
+            float floorX = state->playerState.player.x + rowDistance * (dirX - planeX);
+            float floorY = state->playerState.player.y + rowDistance * (dirY - planeY);
 
             renderTexturedFloor(state->app, &state->graphics, y, floorX, floorY, floorStepX, floorStepY);
         }

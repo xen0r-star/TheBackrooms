@@ -13,7 +13,7 @@ void controllerDown(GameState *state, const SDL_Event event) {
                 state->playerState.showState = !state->playerState.showState; 
                 break;
             case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-                if (state->menu.displayMenu == MENU_NONE && state->playerState.selectFrame < 10) state->playerState.selectFrame += 1;
+                if (state->menu.displayMenu == MENU_NONE && state->playerState.selectFrame < 7) state->playerState.selectFrame += 1;
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
                 if (state->menu.displayMenu == MENU_NONE && state->playerState.selectFrame > 1)  state->playerState.selectFrame -= 1;

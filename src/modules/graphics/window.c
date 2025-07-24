@@ -6,11 +6,19 @@ int initializationWindow(GameState *state) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
         return 1;
     }
-
+    
     if (TTF_Init() == -1) {
         printf("Erreur lors de l'initialisation de SDL_ttf: %s\n", TTF_GetError());
         return 1;
     }
+
+    // Définition de la taille de la fenêtre
+    SDL_Rect usableBounds;
+    if (SDL_GetDisplayUsableBounds(0, &usableBounds) == 0) {
+        state->app.screenWidth = usableBounds.w;
+        state->app.screenHeight = usableBounds.h;
+    }
+
 
     // Création de la fenêtre SDL
     state->app.window = SDL_CreateWindow(WINDOW_TITLE,

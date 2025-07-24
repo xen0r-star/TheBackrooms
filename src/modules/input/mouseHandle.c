@@ -12,7 +12,7 @@ void mouseHandle(GameState *state, const SDL_Event event) {
 
     } else if (event.type == SDL_MOUSEWHEEL) {
         if (event.wheel.y > 0 && state->playerState.selectFrame > 1)       state->playerState.selectFrame -= 1;
-        else if (event.wheel.y < 0 && state->playerState.selectFrame < 5)  state->playerState.selectFrame += 1;
+        else if (event.wheel.y < 0 && state->playerState.selectFrame < 7)  state->playerState.selectFrame += 1;
 
         if (event.wheel.y > 0 && state->menu.scrollOffset > 0) {
             state->menu.scrollOffset = (state->menu.scrollOffset - 20 < 0) ? 0 : state->menu.scrollOffset - 20;
