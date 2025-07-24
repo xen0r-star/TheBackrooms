@@ -9,6 +9,7 @@
 GameState gameState = {
     .app = {800, 600, true, NULL, NULL, NULL, NULL, {NULL}, 0, 0, 0},
     .playerState = {{1.0, 1.0, 0.0}, 150.0, 3.0, 0.0, 0.0, 1, false, false, true, true},
+    .entityState = {NULL, 0}, 
     .menu = {MENU_MAIN, BACKGROUND_MENU, 0},
     .mapState = {MAP_SIZE_LEVEL0, MAP_SIZE_LEVEL0, NULL, NULL, 0},
     .graphics = {NULL, NULL, NULL},
@@ -29,6 +30,20 @@ int main(int argc, char *argv[]) {
     if (initializationMenu(state)    ) return 1;
     if (initializationScreen(state)  ) return 1;
     if (initializationTextures(state)) return 1;
+
+
+    state->entityState.numSprites = 1;
+
+        // Allocation dynamique
+    state->entityState.sprites = malloc(sizeof(Sprite) * state->entityState.numSprites);
+
+    // Initialisation du sprite
+    state->entityState.sprites[0].x = 4.0;
+    state->entityState.sprites[0].y = 4.0;
+    state->entityState.sprites[0].texture_id = 4;
+
+
+
 
     // Boucle principale
     SDL_Event event;

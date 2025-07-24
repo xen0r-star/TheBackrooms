@@ -14,7 +14,7 @@
 
 #define WINDOW_TITLE "ESCAPE THE BACKROOMS"         // Titre de la fenêtre
 #define TEXTURE_SIZE 64                             // Taille des textures
-#define NUMBER_TEXTURES 4                           // Nombre de textures
+#define NUMBER_TEXTURES 5                           // Nombre de textures
 #define MAP_SIZE_LEVEL0 6                           // Nombre de salles dans le niveau 0
 
 #define FONT_ROBOTO "font/Roboto-Regular.ttf"       // Fichier de police
@@ -69,6 +69,11 @@ typedef struct {
     float x, y;
     float angle;
 } Player;
+
+typedef struct {
+    double x, y;
+    int texture_id;
+} Sprite;
 
 typedef struct{
     int r, g, b, a;
@@ -127,6 +132,12 @@ typedef struct {
 
 
 typedef struct {
+    Sprite* sprites;
+    int numSprites;
+} EntityState;
+
+
+typedef struct {
     int displayMenu;
     BackgroundType backgroundType;
     int scrollOffset;
@@ -168,6 +179,7 @@ typedef struct {
 typedef struct {
     AppState app;
     PlayerState playerState;
+    EntityState entityState;
     MenuState menu;
     MapState mapState;
     GraphicsBuffers graphics;

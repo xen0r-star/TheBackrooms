@@ -35,6 +35,8 @@ void renderScene(GameState *state) {
             renderTexturedFloor(state->app, &state->graphics, y, floorX, floorY, floorStepX, floorStepY);
         }
 
+        double *zBuffer = malloc(sizeof(double) * state->app.screenWidth);
+
         for (int x = 0; x < state->app.screenWidth; x++) { // murs
             float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) 
                              + ((float)x / (float)state->app.screenWidth) * state->settings.fov) 
@@ -43,6 +45,8 @@ void renderScene(GameState *state) {
             int wallType, wallSide;
 
             castRay(state->playerState, &state->mapState, rayAngle, &distance, &wallType, &wallSide);   // Convertir en radians
+
+            zBuffer[x] = distance;
 
             int wallHeight = (int)(state->app.screenHeight / distance);         // Hauteur du mur basée sur la distance
             int drawStart = (state->app.screenHeight - wallHeight) / 2;         // Point de départ du mur
@@ -53,12 +57,17 @@ void renderScene(GameState *state) {
 
             // glitchEffect(state->app, &state->graphics, 1);
 
-
+            
             if (wallType == 9) 
                 wallType = 0;
-
+            
             renderTexturedWall(state->app, state->playerState, &state->graphics, x, rayAngle, distance, wallType, wallSide, wallHeight, drawStart, drawEnd);
         }
+
+        render_sprites(state, state->entityState.sprites, state->entityState.numSprites, zBuffer);
+
+        free(zBuffer);
+
     } else {
         for (int x = 0; x < state->app.screenWidth; x++) {
             float rayAngle = ((state->playerState.player.angle - (state->settings.fov / 2.0)) 
@@ -151,7 +160,7 @@ void renderTexturedFloor(const AppState appState, GraphicsBuffers *graphicsBuffe
         Uint32 pixel;
         Uint8 r, g, b, a;
 
-        pixel = graphicsBuffers->textureBuffers[NUMBER_TEXTURES - 1][TEXTURE_SIZE * texY + texX];
+        pixel = graphicsBuffers->textureBuffers[3][TEXTURE_SIZE * texY + texX];
         r = ((pixel >> 24) & 0xFF) / 2;
         g = ((pixel >> 16) & 0xFF) / 2;
         b = ((pixel >> 8 ) & 0xFF) / 2;
@@ -160,7 +169,7 @@ void renderTexturedFloor(const AppState appState, GraphicsBuffers *graphicsBuffe
         graphicsBuffers->screenBuffers[y * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
 
 
-        pixel = graphicsBuffers->textureBuffers[NUMBER_TEXTURES - 2][TEXTURE_SIZE * texY + texX];
+        pixel = graphicsBuffers->textureBuffers[2][TEXTURE_SIZE * texY + texX];
         r = ((pixel >> 24) & 0xFF) / 2;
         g = ((pixel >> 16) & 0xFF) / 2;
         b = ((pixel >> 8 ) & 0xFF) / 2;

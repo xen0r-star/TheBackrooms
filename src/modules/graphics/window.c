@@ -91,6 +91,7 @@ int closeWindow(GameState *state) {
     }
 
     free(state->graphics.textureBuffers);
+    free(state->entityState.sprites);
 
     if (state->app.controller != NULL) {
         SDL_GameControllerClose(state->app.controller);

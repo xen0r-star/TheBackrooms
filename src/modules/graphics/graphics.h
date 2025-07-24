@@ -3,6 +3,7 @@
 
 #include "../../main.h"
 #include "../core/core.h"
+#include "../entities/entity.h"
 
 extern void renderScene(GameState *state);
 
