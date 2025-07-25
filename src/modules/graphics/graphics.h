@@ -16,4 +16,7 @@ extern int initializationWindow(GameState *state);
 extern int closeWindow(GameState *state);
 extern bool hasWindowResize(AppState *appState);
 
+extern float calculateFovRender(float fov);
+extern void calculateDirRender(float angle, float *dirX, float *dirY);
+
 #endif

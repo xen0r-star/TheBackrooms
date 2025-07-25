@@ -4,15 +4,16 @@
 #include "utils/utils.h"
 #include "core/core.h"
 #include "data/data.h"
+#include "entities/entity.h"
 
 
 GameState gameState = {
     .app = {800, 600, true, NULL, NULL, NULL, NULL, {NULL}, 0, 0, 0},
     .playerState = {{1.0, 1.0, 0.0}, 150.0, 3.0, 0.0, 0.0, 1, false, false, true, true},
-    .entityState = {NULL, 0}, 
+    .entityState = {NULL, 0, NULL}, 
     .menu = {MENU_MAIN, BACKGROUND_MENU, 0},
     .mapState = {MAP_SIZE_LEVEL0, MAP_SIZE_LEVEL0, NULL, NULL, 0},
-    .graphics = {NULL, NULL, NULL},
+    .graphics = {NULL, NULL, NULL, {0}},
     .settings = {0.2, 85.0, 1.0}
 };
 
@@ -32,20 +33,14 @@ int main(int argc, char *argv[]) {
     if (initializationTextures(state)) return 1;
 
 
-    state->entityState.numSprites = 1;
-
-    // Allocation dynamique pour 3 sprites
-    state->entityState.sprites = malloc(sizeof(Sprite) * state->entityState.numSprites);
-
-    // Initialisation des sprites
-    state->entityState.sprites[0].x = 4.0;
-    state->entityState.sprites[0].y = 4.0;
-    state->entityState.sprites[0].scaleX = 0.8f;
-    state->entityState.sprites[0].scaleY = 0.8f;
-    state->entityState.sprites[0].texture_id = 4;
-    state->entityState.sprites[0].transform.transparency = 1.0f;
-    state->entityState.sprites[0].transform.moveY = -64.0f;
-
+    initializationEntity(&state->entityState, (Sprite){
+        .x = 4.0,
+        .y = 4.0,
+        .scaleX = 0.8f,
+        .scaleY = 0.8f,
+        .texture_id = 4,
+        .transform = {.transparency = 1.0f, .moveY = -64.0f}
+    });
 
 
     // Boucle principale
@@ -64,7 +59,6 @@ int main(int argc, char *argv[]) {
             if (state->app.controller != NULL) controllerDown(state, event);
         }
 
-
         if (hasWindowResize(&state->app)) {
             printf("REsize\n");
             SDL_DestroyTexture(state->graphics.screenBuffersTexture);
@@ -76,35 +70,28 @@ int main(int argc, char *argv[]) {
             if (initializationMenu(state))   return 1;
         }
 
-
         // Nettoyage de l'écran
         SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255);
         SDL_RenderClear(state->app.renderer);
-
-
+        
         if (state->menu.displayMenu != MENU_NONE) drawMenu(state);
         else {
-            SDL_SetRelativeMouseMode(SDL_TRUE);
-
             // Calcul du FPS
             calculateFPS(&state->app, &state->playerState);
-
 
             keyboardInput(state);
             if (state->app.controller != NULL) controllerInput(state);
 
             renderScene(state);
-            itemFrame(state->app, state->playerState.selectFrame);
 
+            itemFrame(state->app, state->playerState.selectFrame);
             if (state->playerState.showState) showStateInterface(&state->app, state->playerState);
             if (state->playerState.showMap)   showMapInterface(state->app, state->mapState, state->playerState);
         }
 
-
         // Mise à jour de l'écran
         SDL_RenderPresent(state->app.renderer);
     }
-
 
     // Fermeture de la fenêtre
     closeWindow(state);

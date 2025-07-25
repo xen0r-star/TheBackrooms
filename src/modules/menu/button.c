@@ -99,6 +99,7 @@ void handleMenuButtons(GameState *state, int mouseX, int mouseY) {
             } else if (clickedButton(state->menu.launchGame, mouseX, mouseY)) {
                 state->menu.displayMenu = MENU_NONE;
                 state->menu.backgroundType = BACKGROUND_GAME;
+                SDL_SetRelativeMouseMode(SDL_TRUE);
             } else if (clickedButton(state->menu.returnButton, mouseX, mouseY)) {
                 state->menu.displayMenu = MENU_MAIN;
             }
@@ -119,6 +120,7 @@ void handleMenuButtons(GameState *state, int mouseX, int mouseY) {
         case MENU_BREAK:
             if (clickedButton(state->menu.resumeGameButton, mouseX, mouseY)) {
                 state->menu.displayMenu = MENU_NONE;
+                SDL_SetRelativeMouseMode(SDL_TRUE);
             } else if (clickedButton(state->menu.achievementsButton, mouseX, mouseY)) { 
                 state->menu.displayMenu = MENU_ACHIEVEMENTS;
             } else if (clickedButton(state->menu.settingsButton, mouseX, mouseY)) {     

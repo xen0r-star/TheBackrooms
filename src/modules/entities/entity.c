@@ -4,17 +4,16 @@
 
 #define PI 3.14159265358979323846
 
-void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zBuffer)
+void render_sprites(GameState*state, Sprite *sprites, int numSprites, float *zBuffer)
 {
     double posX = state->playerState.player.x;
     double posY = state->playerState.player.y;
 
-    float dirAngle = state->playerState.player.angle * (PI / 180.0);
-    float dirX = cos(dirAngle);
-    float dirY = sin(dirAngle);
+    float dirX = state->graphics.renderCache.dirX;
+    float dirY = state->graphics.renderCache.dirY;
 
-    float planeX = -dirY * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
-    float planeY = dirX * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
+    float planeX = -dirY * state->graphics.renderCache.fovRender;
+    float planeY = dirX * state->graphics.renderCache.fovRender;
 
     const int w = state->app.screenWidth;
     const int h = state->app.screenHeight;
@@ -43,17 +42,16 @@ void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zB
     }
 
 
+    double invDet = 1.0 / (planeX * dirY - dirX * planeY);
+
     for (int i = 0; i < numSprites; i++) {
         float vDiv = sprites[spriteOrder[i]].scaleY;
         float uDiv = sprites[spriteOrder[i]].scaleX;
         float vMove = sprites[spriteOrder[i]].transform.moveY;
         float transparency = sprites[spriteOrder[i]].transform.transparency;
 
-
         double spriteX = sprites[spriteOrder[i]].x - posX;
         double spriteY = sprites[spriteOrder[i]].y - posY;
-
-        double invDet = 1.0 / (planeX * dirY - dirX * planeY);
 
         double transformX = invDet * (dirY * spriteX - dirX * spriteY);
         double transformY = invDet * (-planeY * spriteX + planeX * spriteY);
@@ -61,15 +59,17 @@ void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zB
         int spriteScreenX = (int)((w / 2) * (1 + transformX / transformY));
         int vMoveScreen = (int)(-vMove / transformY);
 
-        if (vDiv == 0) vDiv = 1; 
+        if (vDiv == 0) vDiv = 1;  
         int spriteHeight = abs((int)(h / transformY)) / (1.0f / vDiv);
+        
         int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen;
-        if (drawStartY < 0) drawStartY = 0;
+        if (drawStartY < 0) drawStartY = 0; 
         int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen;
         if (drawEndY >= h) drawEndY = h - 1;
 
         if (uDiv == 0) uDiv = 1; 
         int spriteWidth = abs((int)(h / transformY)) / (1.0f / uDiv);
+
         int drawStartX = -spriteWidth / 2 + spriteScreenX;
         if (drawStartX < 0) drawStartX = 0;
         int drawEndX = spriteWidth / 2 + spriteScreenX;

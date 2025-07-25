@@ -102,6 +102,11 @@ typedef struct {
     int size;
 } Font;
 
+typedef struct {
+    float dirX, dirY;       // Direction du joueur
+    float fovRender;   // Plan de caméra pour raycasting
+} RenderCache;
+
 
 
 
@@ -139,8 +144,9 @@ typedef struct {
 
 
 typedef struct {
-    Sprite* sprites;
+    Sprite *sprites;
     int numSprites;
+    float *zBuffer;
 } EntityState;
 
 
@@ -174,6 +180,7 @@ typedef struct {
     Uint32      *screenBuffers;
     SDL_Texture *screenBuffersTexture;
     Uint32     **textureBuffers;
+    RenderCache renderCache;
 } GraphicsBuffers;
 
 typedef struct {

@@ -16,7 +16,10 @@ void keyboardDown(GameState *state, const SDL_Event event) {
                 state->playerState.collision    = !state->playerState.collision;
                 break;
             case SDLK_ESCAPE:
-                if (state->menu.displayMenu == MENU_NONE) state->menu.displayMenu = MENU_BREAK;
+                if (state->menu.displayMenu == MENU_NONE) {
+                    state->menu.displayMenu = MENU_BREAK;
+                    SDL_SetRelativeMouseMode(SDL_FALSE);
+                }
                 break;
             default:
                 break;

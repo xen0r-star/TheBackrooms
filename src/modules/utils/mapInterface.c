@@ -19,12 +19,12 @@ void showMapInterface(const AppState appState, const MapState mapState, const Pl
     int startX = playerX - windowWidth / 2;
     int startY = playerY - windowHeight / 2;
 
-    if (startX < 0) startX = 0;
-    if (startY < 0) startY = 0;
-    if (startX + windowWidth > mapState.mapWidth)  startX = mapState.mapWidth  - windowWidth;
+    if (startX < 0)                                 startX = 0;
+    if (startY < 0)                                 startY = 0;
+    if (startX + windowWidth > mapState.mapWidth)   startX = mapState.mapWidth  - windowWidth;
     if (startY + windowHeight > mapState.mapHeight) startY = mapState.mapHeight - windowHeight;
-    if (startX < 0) startX = 0;
-    if (startY < 0) startY = 0;
+    if (startX < 0)                                 startX = 0;
+    if (startY < 0)                                 startY = 0;
 
     // === Dessin du fond ===
     for (int y = 0; y < windowHeight; y++) {

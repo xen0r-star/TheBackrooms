@@ -36,7 +36,7 @@ int initializationWindow(GameState *state) {
     SDL_SetWindowPosition(state->app.window, 0, 0);
 
     // Création du renderer SDL
-    state->app.renderer = SDL_CreateRenderer(state->app.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    state->app.renderer = SDL_CreateRenderer(state->app.window, -1, SDL_RENDERER_ACCELERATED);
     if (state->app.renderer == NULL) {
         SDL_DestroyWindow(state->app.window);
         printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
@@ -100,6 +100,7 @@ int closeWindow(GameState *state) {
 
     free(state->graphics.textureBuffers);
     free(state->entityState.sprites);
+    free(state->entityState.zBuffer);
 
     if (state->app.controller != NULL) {
         SDL_GameControllerClose(state->app.controller);

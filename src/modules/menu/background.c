@@ -9,21 +9,25 @@ void background(GameState *state, BackgroundType backgroundType) {
 
         if (!mapGenerated) {
             generateMap(&staticMapState, staticMapState.mapWidth, staticMapState.mapHeight);
+            spawnPlayerFromMap(&staticPlayerState, &staticMapState);
             mapGenerated = true;
         }
 
         staticPlayerState.player.angle += 0.025;
         staticPlayerState.player.angle = (staticPlayerState.player.angle > 360) ? 0 : staticPlayerState.player.angle;
+        calculateDirRender(staticPlayerState.player.angle, &state->graphics.renderCache.dirX, &state->graphics.renderCache.dirY);
 
         GameState gameStateCopy = {
             .app = state->app,
             .playerState = staticPlayerState,
+            .entityState = state->entityState,
             .mapState = staticMapState,
             .graphics = state->graphics,
             .settings = state->settings
         };
 
         renderScene(&gameStateCopy);
+
     } else if (backgroundType == BACKGROUND_GAME) {
         SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, 
             state->graphics.screenBuffers, 

@@ -1,8 +1,6 @@
 #include "menu.h"
 
 void drawMenu(GameState *state) {
-    SDL_SetRelativeMouseMode(SDL_FALSE);
-
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 

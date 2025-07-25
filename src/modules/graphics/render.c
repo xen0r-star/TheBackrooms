@@ -7,18 +7,17 @@
 // renderScene: Fonction pour dessiner la scène
 void renderScene(GameState *state)
 {
-    // Dessin des colonnes de murs
+    // Récupération des dimensions de l'écran
     int screenWidth = state->app.screenWidth;
     int screenHeight = state->app.screenHeight;
 
     // Angle centre caméra en radians
-    float dirAngle = state->playerState.player.angle * (PI / 180.0);
-    float dirX = cos(dirAngle);
-    float dirY = sin(dirAngle);
+    float dirX = state->graphics.renderCache.dirX;
+    float dirY = state->graphics.renderCache.dirY;
 
     // Plan de caméra (perpendiculaire à direction)
-    float planeX = -dirY * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
-    float planeY = dirX * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
+    float planeX = -dirY * state->graphics.renderCache.fovRender;
+    float planeY = dirX * state->graphics.renderCache.fovRender;
 
 
     if (state->playerState.showTextures)
@@ -51,6 +50,7 @@ void renderScene(GameState *state)
 
                 int texX = (int)(TEXTURE_SIZE * (floorX - cellX)) & (TEXTURE_SIZE - 1);
                 int texY = (int)(TEXTURE_SIZE * (floorY - cellY)) & (TEXTURE_SIZE - 1);
+                int texIndex = TEXTURE_SIZE * texY + texX;
 
                 floorX += floorStepX;
                 floorY += floorStepY;
@@ -58,7 +58,7 @@ void renderScene(GameState *state)
                 Uint32 pixel;
                 Uint8 r, g, b, a;
 
-                pixel = state->graphics.textureBuffers[3][TEXTURE_SIZE * texY + texX];
+                pixel = state->graphics.textureBuffers[3][texIndex];
                 r = ((pixel >> 24) & 0xFF) / 2;
                 g = ((pixel >> 16) & 0xFF) / 2;
                 b = ((pixel >> 8) & 0xFF) / 2;
@@ -66,7 +66,7 @@ void renderScene(GameState *state)
 
                 state->graphics.screenBuffers[y * screenWidth + x] = (a << 24) | (r << 16) | (g << 8) | b;
 
-                pixel = state->graphics.textureBuffers[2][TEXTURE_SIZE * texY + texX];
+                pixel = state->graphics.textureBuffers[2][texIndex];
                 r = ((pixel >> 24) & 0xFF) / 2;
                 g = ((pixel >> 16) & 0xFF) / 2;
                 b = ((pixel >> 8) & 0xFF) / 2;
@@ -77,20 +77,19 @@ void renderScene(GameState *state)
         }
 
         // ==== DESSIN DES MURS ET ENTITER ====
-        double *zBuffer = malloc(sizeof(double) * screenWidth);
         float distance;
         int wallType, wallSide;
+        float invScreenWidth = 2.0f / screenWidth;
 
         for (int x = 0; x < screenWidth; x++)
         {
-
-            float cameraX = 2 * x / (double)(screenWidth) - 1;
+            float cameraX = x * invScreenWidth - 1.0f;
             float rayDirX = dirX + planeX * cameraX;
             float rayDirY = dirY + planeY * cameraX;
 
             castRay(state->playerState, &state->mapState, rayDirX, rayDirY, &distance, &wallType, &wallSide); // Convertir en radians
 
-            zBuffer[x] = distance;
+            state->entityState.zBuffer[x] = distance;
 
             int wallHeight = (int)(screenHeight / distance);    // Hauteur du mur basée sur la distance
             int drawStart = -wallHeight / 2 + screenHeight / 2; // Point de départ du mur
@@ -126,8 +125,9 @@ void renderScene(GameState *state)
                 Uint8 b = ((pixel >> 8) & 0xFF) / (wallSide == 1 ? 2 : 1);
                 Uint8 a = pixel & 0xFF;
 
-                float fogFactor = fmin(distance / 30.0, 0.5);
-                fogFactor = powf(fogFactor, 2.0f);
+                float fogFactor = distance / 30.0f;
+                if (fogFactor > 0.5f) fogFactor = 0.5f;
+                fogFactor *= fogFactor;
 
                 r = (Uint8)((1 - fogFactor) * r + fogFactor * 0);
                 g = (Uint8)((1 - fogFactor) * g + fogFactor * 0);
@@ -137,25 +137,23 @@ void renderScene(GameState *state)
             }
         }
 
-        render_sprites(state, state->entityState.sprites, state->entityState.numSprites, zBuffer);
-
-        free(zBuffer);
+        render_sprites(state, state->entityState.sprites, state->entityState.numSprites, state->entityState.zBuffer);
     }
     else
-    {   
-        double *zBuffer = malloc(sizeof(double) * screenWidth);
+    {
         float distance;
         int wallType, wallSide;
+        float invScreenWidth = 2.0f / screenWidth;
 
         for (int x = 0; x < screenWidth; x++)
         {
-            float cameraX = 2 * x / (double)(screenWidth) - 1;
+            float cameraX = x * invScreenWidth - 1.0f;
             float rayDirX = dirX + planeX * cameraX;
             float rayDirY = dirY + planeY * cameraX;
 
             castRay(state->playerState, &state->mapState, rayDirX, rayDirY, &distance, &wallType, &wallSide); // Convertir en radians
 
-            zBuffer[x] = distance;
+            state->entityState.zBuffer[x] = distance;
 
             int wallHeight = (int)(screenHeight / distance); // Hauteur du mur basée sur la distance
             int drawStart = (screenHeight - wallHeight) / 2; // Point de départ du mur
@@ -194,7 +192,9 @@ void renderScene(GameState *state)
                 color.b /= 2;
             }
 
-            float fogFactor = fmin(distance / 60.0, 0.5);
+            float fogFactor = distance / 30.0f;
+            if (fogFactor > 0.5f) fogFactor = 0.5f;
+            fogFactor *= fogFactor;
 
             color.r = (1 - fogFactor) * color.r + fogFactor * 170;
             color.g = (1 - fogFactor) * color.g + fogFactor * 170;
@@ -218,9 +218,7 @@ void renderScene(GameState *state)
             }
         }
 
-        render_sprites(state, state->entityState.sprites, state->entityState.numSprites, zBuffer);
-
-        free(zBuffer);
+        render_sprites(state, state->entityState.sprites, state->entityState.numSprites, state->entityState.zBuffer);
     }
 
     SDL_UpdateTexture(state->graphics.screenBuffersTexture, NULL, state->graphics.screenBuffers, screenWidth * sizeof(Uint32));
