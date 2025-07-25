@@ -13,7 +13,7 @@ GameState gameState = {
     .menu = {MENU_MAIN, BACKGROUND_MENU, 0},
     .mapState = {MAP_SIZE_LEVEL0, MAP_SIZE_LEVEL0, NULL, NULL, 0},
     .graphics = {NULL, NULL, NULL},
-    .settings = {0.2, 90.0, 1.0}
+    .settings = {0.2, 85.0, 1.0}
 };
 
 

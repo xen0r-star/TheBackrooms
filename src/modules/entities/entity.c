@@ -9,13 +9,12 @@ void render_sprites(GameState*state, Sprite *sprites, int numSprites, double *zB
     double posX = state->playerState.player.x;
     double posY = state->playerState.player.y;
 
-    float angleRad = state->playerState.player.angle * (PI / 180.0);
-    float dirX = cos(angleRad);
-    float dirY = sin(angleRad);
+    float dirAngle = state->playerState.player.angle * (PI / 180.0);
+    float dirX = cos(dirAngle);
+    float dirY = sin(dirAngle);
 
-    float fov = state->settings.fov * (PI / 180.0);
-    float planeX = -dirY * tan(fov / 2.0);
-    float planeY = dirX * tan(fov / 2.0);
+    float planeX = -dirY * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
+    float planeY = dirX * tanf((state->settings.fov / 2.0f) * PI / 180.0f);
 
     const int w = state->app.screenWidth;
     const int h = state->app.screenHeight;

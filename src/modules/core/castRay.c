@@ -1,12 +1,9 @@
 #include "core.h"
 
 // castRay: Fonction qui trace un rayon => retourne la distance jusqu'au mur et le type de mur
-int castRay(const PlayerState playerState, MapState *mapState, float angle, float *distance, int *wallType, int *wallSide) {
+int castRay(const PlayerState playerState, MapState *mapState, float rayDirX, float rayDirY, float *distance, int *wallType, int *wallSide) {
     float x = playerState.player.x;
     float y = playerState.player.y;
-
-    float rayDirX = cos(angle);
-    float rayDirY = sin(angle);
 
     float deltaDistX = (rayDirX == 0) ? 1e30 : fabs(1 / rayDirX);
     float deltaDistY = (rayDirY == 0) ? 1e30 : fabs(1 / rayDirY);

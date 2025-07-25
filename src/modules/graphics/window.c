@@ -24,12 +24,16 @@ int initializationWindow(GameState *state) {
     state->app.window = SDL_CreateWindow(WINDOW_TITLE,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
-                                          state->app.screenWidth, state->app.screenHeight, SDL_WINDOW_ALLOW_HIGHDPI);
+                                          state->app.screenWidth, 
+                                          state->app.screenHeight, 
+                                          SDL_WINDOW_BORDERLESS);
     if (state->app.window == NULL) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
+
+    SDL_SetWindowPosition(state->app.window, 0, 0);
 
     // Création du renderer SDL
     state->app.renderer = SDL_CreateRenderer(state->app.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -81,10 +85,6 @@ int initializationWindow(GameState *state) {
                 state->app.controller = SDL_GameControllerOpen(i);
             }
         }
-
-        // if (state->app.controller == NULL) {
-        //     printf("Could not open gamecontroller! SDL_Error: %s\n", SDL_GetError());
-        // }
     }
 
     return 0;
