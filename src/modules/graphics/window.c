@@ -207,12 +207,6 @@ int initializationWindow(GameState *state) {
 }
 
 
-
-/**
- * @brief Safely closes and cleans up all graphics resources
- * @param state Game state containing resources to cleanup
- * @return GRAPHICS_SUCCESS on successful cleanup
- */
 int closeWindow(GameState *state) {
     if (!state) {
         return GRAPHICS_ERROR_INIT;
@@ -277,11 +271,6 @@ int closeWindow(GameState *state) {
     return GRAPHICS_SUCCESS;
 }
 
-/**
- * @brief Checks if the window has been resized
- * @param appState Application state to check
- * @return true if window was resized, false otherwise
- */
 bool hasWindowResize(AppState *appState) {
     if (!appState || !appState->window) {
         return false;
