@@ -1,6 +1,14 @@
 #include "menu.h"
 
 int initializationMenu(GameState *state) {
+    // Initialize sound system only on first call
+    static int soundsInitialized = 0;
+    if (!soundsInitialized) {
+        initSounds();
+        playMenuMusic();
+        soundsInitialized = 1;
+    }
+    
     int screenWidth = state->app.screenWidth;
     int screenHeight = state->app.screenHeight;
 

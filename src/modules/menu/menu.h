@@ -5,6 +5,7 @@
 #include "../map/map.h"
 #include "../data/data.h"
 #include "../utils/utils.h"
+#include "../sounds/sounds.h"
 
 
 extern int initializationMenu(GameState *state);

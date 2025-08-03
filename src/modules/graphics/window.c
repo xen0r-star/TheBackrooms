@@ -2,8 +2,14 @@
 
 int initializationWindow(GameState *state) {
     // Initialisation de SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
+        return 1;
+    }
+    
+    // Initialize SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
         return 1;
     }
     
@@ -116,6 +122,17 @@ int closeWindow(GameState *state) {
     SDL_DestroyRenderer(state->app.renderer);
     SDL_DestroyWindow(state->app.window);
 
+    // Free music resources
+    extern Mix_Music *music;
+    extern Mix_Chunk *sound;
+    if (music != NULL) {
+        Mix_FreeMusic(music);
+    }
+    if (sound != NULL) {
+        Mix_FreeChunk(sound);
+    }
+    
+    Mix_CloseAudio();
     TTF_Quit();
     SDL_Quit();
 

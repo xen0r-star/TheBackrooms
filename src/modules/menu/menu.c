@@ -4,6 +4,7 @@ void drawMenu(GameState *state) {
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
+
     if (state->menu.displayMenu == MENU_MAIN) {
         background(state, state->menu.backgroundType);
         renderText(&state->app, CENTER, state->app.screenWidth / 2, 100, "ESCAPE", (Color){255, 255, 255, 255}, TEXT_TITLE);
@@ -15,6 +16,9 @@ void drawMenu(GameState *state) {
             state->menu.settingsButton, 
             state->menu.exitButton
         );
+
+
+
 
     } else if (state->menu.displayMenu == MENU_LOAD) { // Load
         background(state, state->menu.backgroundType);
