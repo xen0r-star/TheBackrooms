@@ -14,6 +14,7 @@
 #include "../map/map.h"
 #include "../data/data.h"
 #include "../utils/utils.h"
+#include "../sounds/sounds.h"
 
 // Menu system constants
 #define MAX_SAVE_SLOTS           3

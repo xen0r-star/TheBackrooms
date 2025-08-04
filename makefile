@@ -22,13 +22,13 @@ PUBLIC_DIR = public
 ifeq ($(PLATFORM),windows)
     # Windows (MinGW) configuration
     CFLAGS = -I/mingw64/include/SDL2 -Isrc/modules -Wall -Wextra -O2
-    LDFLAGS = -L/mingw64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image
+    LDFLAGS = -L/mingw64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
     TARGET_EXT = .exe
     RES_OBJ = $(BUILD_DIR)/resource.o
 else ifeq ($(PLATFORM),linux)
     # Linux configuration
     CFLAGS = $(shell pkg-config --cflags sdl2) -Isrc/modules -Wall -Wextra -O2
-    LDFLAGS = $(shell pkg-config --libs sdl2) -lSDL2_ttf -lSDL2_image -lm
+    LDFLAGS = $(shell pkg-config --libs sdl2) -lSDL2_ttf -lSDL2_image -lSDL2_mixer -lm
     TARGET_EXT = 
     RES_OBJ = 
 else

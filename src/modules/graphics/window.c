@@ -15,8 +15,14 @@ static int validateScreenDimensions(int width, int height) {
 
 static int initializeSDLSubsystems(void) {
     // Initialize SDL video subsystem
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         printf("Error: SDL_Init failed: %s\n", SDL_GetError());
+        return -1;
+    }
+    
+    // Initialize SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("Error: SDL_mixer could not initialize: %s\n", Mix_GetError());
         return -1;
     }
     
@@ -261,7 +267,18 @@ int closeWindow(GameState *state) {
         state->app.window = NULL;
     }
 
+    // Free music resources
+    extern Mix_Music *music;
+    extern Mix_Chunk *sound;
+    if (music != NULL) {
+        Mix_FreeMusic(music);
+    }
+    if (sound != NULL) {
+        Mix_FreeChunk(sound);
+    } 
+    
     // Quit SDL subsystems
+    Mix_CloseAudio();
     TTF_Quit();
     SDL_Quit();
 

@@ -16,6 +16,14 @@ int initializationMenu(GameState *state) {
         fprintf(stderr, "Error: Invalid screen dimensions (%dx%d)\n", screenWidth, screenHeight);
         return -1;
     }
+      
+    // Initialize sound system only on first call
+    static int soundsInitialized = 0;
+    if (!soundsInitialized) {
+        initSounds();
+        playMenuMusic();
+        soundsInitialized = 1;
+    }
 
     // Define consistent button properties
     const int buttonWidth = 400;

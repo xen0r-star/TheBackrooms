@@ -29,6 +29,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 
 // Game configuration constants
 #define WINDOW_TITLE "ESCAPE THE BACKROOMS"    // Main window title
