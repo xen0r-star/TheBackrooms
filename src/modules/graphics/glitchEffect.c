@@ -1,71 +1,127 @@
 #include "graphics.h"
+#include <time.h>
 
-void glitchEffect(const AppState appState, GraphicsBuffers *graphicsBuffers, int speed)
-{
-    int screenWidth = appState.screenWidth;
-    int screenHeight = appState.screenHeight;
 
-    srand(clock() / (1000 / speed));
+static int validateGlitchParams(const AppState appState, const GraphicsBuffers *graphicsBuffers, int speed) {
+    if (!graphicsBuffers || !graphicsBuffers->screenBuffers) {
+        return -1;
+    }
+    
+    if (appState.screenWidth <= 0 || appState.screenHeight <= 0) {
+        return -1;
+    }
+    
+    if (speed <= 0 || speed > 100) {
+        return -1;
+    }
+    
+    return 0;
+}
 
-    // 1. Lignes de balayage (scan lines)
-    for (int y = 0; y < screenHeight; y += 2)
-    {
-        for (int x = 0; x < screenWidth; x++)
-        {
+static void applyScanLines(Uint32 *screenBuffers, int screenWidth, int screenHeight) {
+    // Apply scan lines every other row for CRT effect
+    for (int y = 0; y < screenHeight; y += 2) {
+        for (int x = 0; x < screenWidth; x++) {
             int index = y * screenWidth + x;
-            graphicsBuffers->screenBuffers[index] = (50 << 24) | (0 << 16) | (0 << 8) | 0;
+            // Darken scan lines with semi-transparent black
+            screenBuffers[index] = (50 << 24) | (0 << 16) | (0 << 8) | 0;
         }
     }
+}
 
-    // 2. Distorsions de ligne aléatoires
-    for (int y = 0; y < screenHeight; y += 15)
-    {                                  // Bandes de 15 pixels de hauteur
-        int shift = (rand() % 10) - 5; // Décalage aléatoire entre -5 et +5 pixels
+static void applyHorizontalDistortion(Uint32 *screenBuffers, int screenWidth, int screenHeight) {
+    // Random horizontal line distortions
+    for (int y = 0; y < screenHeight; y += 15) { // Bands of 15 pixels height
+        int shift = (rand() % 10) - 5; // Random shift between -5 and +5 pixels
 
-        for (int x = 0; x < screenWidth; x++)
-        {
+        for (int x = 0; x < screenWidth; x++) {
             int index = y * screenWidth + x;
             int shiftedX = x + shift;
 
-            if (shiftedX >= 0 && shiftedX < screenWidth)
-            {
-                graphicsBuffers->screenBuffers[index] = graphicsBuffers->screenBuffers[y * screenWidth + shiftedX];
+            // Bounds checking to prevent buffer overflow
+            if (shiftedX >= 0 && shiftedX < screenWidth) {
+                screenBuffers[index] = screenBuffers[y * screenWidth + shiftedX];
             }
         }
     }
+}
 
-    // 3. Bruit de couleur (artefacts)
-    // for (int i = 0; i < screenWidth * screenHeight / 50; i++) { // Quelques pixels aléatoires
-    //     int randomX = rand() % screenWidth;
-    //     int randomY = rand() % screenHeight;
-    //     int index = randomY * screenWidth + randomX;
+__attribute__((unused))
+static void applyColorNoise(Uint32 *screenBuffers, int screenWidth, int screenHeight) {
+    // Suppress unused parameter warnings for placeholder function
+    (void)screenBuffers;
+    (void)screenWidth;
+    (void)screenHeight;
+    
+    // Add random color noise (currently disabled for performance)
+    // Uncomment for additional visual noise effect
+    /*
+    for (int i = 0; i < screenWidth * screenHeight / 50; i++) { // Some random pixels
+        int randomX = rand() % screenWidth;
+        int randomY = rand() % screenHeight;
+        int index = randomY * screenWidth + randomX;
 
-    //     Uint8 r = rand() % 256;
-    //     Uint8 g = rand() % 256;
-    //     Uint8 b = rand() % 256;
-    //     graphicsBuffers->screenBuffers[index] = (255 << 24) | (r << 16) | (g << 8) | b;
-    // }
+        Uint8 r = rand() % 256;
+        Uint8 g = rand() % 256;
+        Uint8 b = rand() % 256;
+        screenBuffers[index] = (255 << 24) | (r << 16) | (g << 8) | b;
+    }
+    */
+}
 
-    // 4. Déformation de couleur
-    // int bandHeight = 100;
-    // int startY = rand() % (screenHeight - bandHeight);
+__attribute__((unused))
+static void applyChromaticAberration(Uint32 *screenBuffers, int screenWidth, int screenHeight) {
+    // Suppress unused parameter warnings for placeholder function
+    (void)screenBuffers;
+    (void)screenWidth;
+    (void)screenHeight;
+    
+    // Color channel separation effect (currently disabled)
+    // Uncomment for chromatic aberration effect
+    /*
+    int bandHeight = 100;
+    int startY = rand() % (screenHeight - bandHeight);
 
-    // for (int y = startY; y < startY + bandHeight; y += 2) {  // sauter une ligne sur 2
-    //     for (int x = 0; x < screenWidth; x += 2) {            // sauter un pixel sur 2
-    //         int index = y * screenWidth + x;
-    //         Uint8 r = (graphicsBuffers->screenBuffers[index] >> 16) & 0xFF;
-    //         Uint8 b = graphicsBuffers->screenBuffers[index] & 0xFF;
+    for (int y = startY; y < startY + bandHeight; y += 2) {  // Skip every other line
+        for (int x = 0; x < screenWidth; x += 2) {            // Skip every other pixel
+            int index = y * screenWidth + x;
+            Uint8 r = (screenBuffers[index] >> 16) & 0xFF;
+            Uint8 b = screenBuffers[index] & 0xFF;
 
-    //         int redX = x + 1;
-    //         int blueX = x - 1;
+            int redX = x + 1;
+            int blueX = x - 1;
 
-    //         int randomValue = rand() % 18;
+            int randomValue = rand() % 18;
 
-    //         if (randomValue == 3 && redX < screenWidth) {
-    //             graphicsBuffers->screenBuffers[y * screenWidth + redX] = (255 << 24) | (r << 16) | (0 << 8) | 0;
-    //         } else if (randomValue == 6 && blueX >= 0) {
-    //             graphicsBuffers->screenBuffers[y * screenWidth + blueX] |= (255 << 24) | (0 << 16) | (0 << 8) | 70;
-    //         }
-    //     }
-    // }
+            if (randomValue == 3 && redX < screenWidth) {
+                screenBuffers[y * screenWidth + redX] = (255 << 24) | (r << 16) | (0 << 8) | 0;
+            } else if (randomValue == 6 && blueX >= 0) {
+                screenBuffers[y * screenWidth + blueX] |= (255 << 24) | (0 << 16) | (0 << 8) | 70;
+            }
+        }
+    }
+    */
+}
+
+
+void glitchEffect(const AppState appState, GraphicsBuffers *graphicsBuffers, int speed) {
+    // Validate input parameters
+    if (validateGlitchParams(appState, graphicsBuffers, speed) != 0) {
+        return;
+    }
+
+    int screenWidth = appState.screenWidth;
+    int screenHeight = appState.screenHeight;
+
+    // Seed random number generator based on time and speed
+    // This creates time-varying but speed-controlled randomness
+    srand((unsigned int)(clock() / (1000 / speed)));
+
+    // Apply various glitch effects in sequence
+    applyScanLines(graphicsBuffers->screenBuffers, screenWidth, screenHeight);
+    applyHorizontalDistortion(graphicsBuffers->screenBuffers, screenWidth, screenHeight);
+    
+    // Additional effects (currently disabled for performance/aesthetics)
+    // applyColorNoise(graphicsBuffers->screenBuffers, screenWidth, screenHeight);
+    // applyChromaticAberration(graphicsBuffers->screenBuffers, screenWidth, screenHeight);
 }

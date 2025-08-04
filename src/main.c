@@ -18,21 +18,45 @@ GameState gameState = {
 };
 
 
-
 int main(int argc, char *argv[]) {
+    // Suppress unused parameter warnings
     (void)argc;
     (void)argv;
 
-
+    // Allocate and initialize game state
     GameState *state = malloc(sizeof(GameState));
+    if (!state) {
+        fprintf(stderr, "Error: Failed to allocate memory for game state\n");
+        return 1;
+    }
     *state = gameState;
 
-    if (initializationWindow(state)  ) return 1;
-    if (initializationMenu(state)    ) return 1;
-    if (initializationScreen(state)  ) return 1;
-    if (initializationTextures(state)) return 1;
+    // Initialize all game subsystems with error checking
+    if (initializationWindow(state)) {
+        fprintf(stderr, "Error: Failed to initialize window\n");
+        free(state);
+        return 1;
+    }
+    
+    if (initializationMenu(state)) {
+        fprintf(stderr, "Error: Failed to initialize menu system\n");
+        closeWindow(state);
+        return 1;
+    }
+    
+    if (initializationScreen(state)) {
+        fprintf(stderr, "Error: Failed to initialize screen buffers\n");
+        closeWindow(state);
+        return 1;
+    }
+    
+    if (initializationTextures(state)) {
+        fprintf(stderr, "Error: Failed to load textures\n");
+        closeWindow(state);
+        return 1;
+    }
 
-
+    // Initialize test entity with bread texture
     initializationEntity(&state->entityState, (Sprite){
         .x = 4.0,
         .y = 4.0,
@@ -42,58 +66,94 @@ int main(int argc, char *argv[]) {
         .transform = {.transparency = 1.0f, .moveY = -64.0f}
     });
 
+    // Initialize timing for FPS calculation
+    state->app.startTime = clock();
+    state->app.previousTime = clock();
 
-    // Boucle principale
+    // Main game loop
     SDL_Event event;
-    state->app.startTime = clock(), state->app.previousTime = clock();
     while (state->app.running) {
-        // Gestion des événements
+        // Process all pending events
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 state->app.running = false;
+                break;
             }
 
+            // Handle input events
             mouseHandle(state, event);
             keyboardDown(state, event);
 
-            if (state->app.controller != NULL) controllerDown(state, event);
+            // Handle controller input if available
+            if (state->app.controller != NULL) {
+                controllerDown(state, event);
+            }
         }
 
+        // Handle window resize events
         if (hasWindowResize(&state->app)) {
-            printf("REsize\n");
+            printf("Window resize detected, reinitializing graphics\n");
+            
+            // Clean up existing graphics resources
             SDL_DestroyTexture(state->graphics.screenBuffersTexture);
             free(state->graphics.screenBuffers);
+            state->graphics.screenBuffers = NULL;
+            state->graphics.screenBuffersTexture = NULL;
 
+            // Update window dimensions
             SDL_GetWindowSize(state->app.window, &state->app.screenWidth, &state->app.screenHeight);
 
-            if (initializationScreen(state)) return 1;
-            if (initializationMenu(state))   return 1;
+            // Reinitialize graphics systems
+            if (initializationScreen(state)) {
+                fprintf(stderr, "Error: Failed to reinitialize screen after resize\n");
+                break;
+            }
+            if (initializationMenu(state)) {
+                fprintf(stderr, "Error: Failed to reinitialize menu after resize\n");
+                break;
+            }
         }
 
-        // Nettoyage de l'écran
+        // Clear screen with black background
         SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255);
         SDL_RenderClear(state->app.renderer);
         
-        if (state->menu.displayMenu != MENU_NONE) drawMenu(state);
-        else {
-            // Calcul du FPS
+        // Render appropriate content based on current state
+        if (state->menu.displayMenu != MENU_NONE) {
+            // Render menu interface
+            drawMenu(state);
+        } else {
+            // Game rendering and logic
+            
+            // Calculate frame rate and update movement speeds
             calculateFPS(&state->app, &state->playerState);
 
+            // Process continuous input (movement, etc.)
             keyboardInput(state);
-            if (state->app.controller != NULL) controllerInput(state);
+            if (state->app.controller != NULL) {
+                controllerInput(state);
+            }
 
+            // Render main game scene
             renderScene(state);
 
+            // Render UI overlays
             itemFrame(state->app, state->playerState.selectFrame);
-            if (state->playerState.showState) showStateInterface(&state->app, state->playerState);
-            if (state->playerState.showMap)   showMapInterface(state->app, state->mapState, state->playerState);
+            
+            // Render debug interfaces if enabled
+            if (state->playerState.showState) {
+                showStateInterface(&state->app, state->playerState, state->entityState);
+            }
+            if (state->playerState.showMap) {
+                showMapInterface(state->app, state->mapState, state->playerState);
+            }
         }
 
-        // Mise à jour de l'écran
+        // Present the rendered frame to screen
         SDL_RenderPresent(state->app.renderer);
     }
 
-    // Fermeture de la fenêtre
+    // Cleanup and exit
     closeWindow(state);
     return 0;
-}
+} 
