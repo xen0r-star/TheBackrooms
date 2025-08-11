@@ -40,6 +40,16 @@
 extern void render_sprites(GameState *state, Sprite *sprites, int numSprites, float *zBuffer);
 
 /**
+ * @brief Updates all entity positions and simple AI each frame
+ *
+ * Applies basic wander/chase behavior and tile collision against the map.
+ * Uses frame time from AppState FPS timings to ensure smooth movement.
+ *
+ * @param state Pointer to game state (reads player, map; writes entity positions)
+ */
+extern void updateEntities(GameState *state);
+
+/**
  * @brief Adds a new sprite entity to the entity system
  * 
  * Dynamically expands the sprite array and adds a new sprite entity.

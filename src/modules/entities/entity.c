@@ -207,8 +207,104 @@ void render_sprites(GameState *state, Sprite *sprites, int numSprites, float *zB
                 }
             }
         }
+    }
 
-        // Clean up allocated memory
-        free(spriteData);
+    // Clean up allocated memory (after rendering all sprites)
+    free(spriteData);
+}
+
+// --- Movement & simple AI -------------------------------------------------
+
+static bool entityCanMoveTo(const GameState *state, float newX, float newY) {
+    int mapX = (int)newX;
+    int mapY = (int)newY;
+    if (mapX < 0 || mapY < 0 || mapX >= state->mapState.mapWidth || mapY >= state->mapState.mapHeight) {
+        return false;
+    }
+    // When collision is enabled, avoid non-empty tiles; otherwise only avoid solid walls (1)
+    if (state->playerState.collision) {
+        return state->mapState.map[mapY][mapX] == 0;
+    } else {
+        return state->mapState.map[mapY][mapX] != 1;
+    }
+}
+
+static void pickNewWanderDirection(Sprite *s) {
+    // Random small direction
+    float angle = ((float)rand() / (float)RAND_MAX) * 2.0f * (float)PI;
+    float mag = 0.5f + ((float)rand() / (float)RAND_MAX) * 0.5f; // 0.5..1.0
+    s->velX = cosf(angle) * s->speed * mag;
+    s->velY = sinf(angle) * s->speed * mag;
+    // Next change in 1..3 seconds
+    s->wanderTimer = 1.0f + ((float)rand() / (float)RAND_MAX) * 2.0f;
+}
+
+void updateEntities(GameState *state) {
+    if (!state || !state->entityState.sprites || state->entityState.numSprites <= 0) return;
+
+    // Frame time from FPS computation
+    // calculateFPS already ran this frame and updated playerMoveSpeed based on frameTime.
+    // Reconstruct frameTime from moveSpeed ratio to avoid storing it separately.
+    float frameTime;
+    if (state->playerState.moveSpeed > 0.0f) {
+        frameTime = state->playerState.playerMoveSpeed / state->playerState.moveSpeed;
+    } else {
+        frameTime = 1.0f / fmaxf(1.0f, state->app.fps);
+    }
+
+    // Simple AI per sprite
+    for (int i = 0; i < state->entityState.numSprites; ++i) {
+        Sprite *s = &state->entityState.sprites[i];
+
+        // Initialize defaults if zeroed
+        if (s->speed <= 0.0f) s->speed = 1.5f; // default speed
+        if (s->chaseRadius <= 0.0f) s->chaseRadius = 4.0f; // tiles
+
+        // Vector to player
+        float dx = (float)state->playerState.player.x - (float)s->x;
+        float dy = (float)state->playerState.player.y - (float)s->y;
+        float dist2 = dx*dx + dy*dy;
+        float chaseR2 = s->chaseRadius * s->chaseRadius;
+
+        if (dist2 < chaseR2) {
+            // Chase player: accelerate towards player direction
+            float d = sqrtf(fmaxf(dist2, 1e-6f));
+            float dirX = dx / d;
+            float dirY = dy / d;
+            float targetVX = dirX * s->speed;
+            float targetVY = dirY * s->speed;
+            // Simple smoothing towards target velocity
+            s->velX = 0.85f * s->velX + 0.15f * targetVX;
+            s->velY = 0.85f * s->velY + 0.15f * targetVY;
+            s->wanderTimer = 0.2f; // keep re-evaluating while chasing
+        } else {
+            // Wander behavior
+            s->wanderTimer -= frameTime;
+            if (s->wanderTimer <= 0.0f || (fabsf(s->velX) < 1e-4f && fabsf(s->velY) < 1e-4f)) {
+                pickNewWanderDirection(s);
+            }
+        }
+
+        // Attempt movement with collision; separate axis resolution to slide on walls
+        float stepX = s->velX * frameTime;
+        float stepY = s->velY * frameTime;
+
+        float newX = (float)s->x + stepX;
+        float newY = (float)s->y;
+        if (entityCanMoveTo(state, newX, newY)) {
+            s->x = newX;
+        } else {
+            // bounce a bit when colliding horizontally
+            s->velX *= -0.5f;
+        }
+
+        newX = (float)s->x;
+        newY = (float)s->y + stepY;
+        if (entityCanMoveTo(state, newX, newY)) {
+            s->y = newY;
+        } else {
+            // bounce a bit when colliding vertically
+            s->velY *= -0.5f;
+        }
     }
 }

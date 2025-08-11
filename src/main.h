@@ -144,6 +144,12 @@ typedef struct {
     float scaleX, scaleY;     // Horizontal and vertical scaling factors
     int texture_id;           // Index into texture array
     transform_Sprite transform; // Additional visual effects
+    // Movement parameters (optional)
+    float velX;               // Current velocity X (units/second)
+    float velY;               // Current velocity Y (units/second)
+    float speed;              // Preferred speed (units/second)
+    float wanderTimer;        // Time left before picking a new wander direction
+    float chaseRadius;        // Distance at which the sprite starts chasing the player
 } Sprite;
 
 /**
@@ -334,6 +340,23 @@ typedef struct {
 } Settings;
 
 /**
+ * @brief Achievement definition and runtime state
+ */
+typedef struct {
+    const char *id;        // Unique identifier
+    const char *title;     // Display title
+    const char *desc;      // Description
+    int progress;          // Current progress value
+    int target;            // Target value to unlock (<=0 means binary)
+    bool unlocked;         // Unlocked flag
+} Achievement;
+
+typedef struct {
+    Achievement *items;    // Dynamic list
+    int count;             // Number of achievements
+} AchievementState;
+
+/**
  * @brief Complete game state structure
  * 
  * Master structure containing all game subsystem states.
@@ -347,6 +370,7 @@ typedef struct {
     MapState mapState;         // World map and discovery data
     GraphicsBuffers graphics;  // Rendering buffers and caches
     Settings settings;         // User preferences and configuration
+    AchievementState achievements; // Achievements list and state
 } GameState;
 
 // Global game state declaration

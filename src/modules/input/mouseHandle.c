@@ -35,7 +35,6 @@ static void processMouseWheel(GameState *state, int wheelY) {
     const int MIN_FRAME = 1;
     const int MAX_FRAME = 7;
     const int SCROLL_STEP = 20;
-    const int MAX_SCROLL_OFFSET = 995; // Calculated based on menu layout
     
     if (wheelY > 0) {
         // Scroll up / Previous frame
@@ -43,10 +42,20 @@ static void processMouseWheel(GameState *state, int wheelY) {
             state->playerState.selectFrame -= 1;
         }
         
-        // Menu scroll up
+        // Menu scroll up (dynamic clamp)
         if (state->menu.scrollOffset > 0) {
-            state->menu.scrollOffset = (state->menu.scrollOffset - SCROLL_STEP < 0) ? 
-                                      0 : state->menu.scrollOffset - SCROLL_STEP;
+            int contentHeight = 0;
+            if (state->menu.displayMenu == MENU_ACHIEVEMENTS) {
+                const int achievementHeight = 125;
+                const int achievementSpacing = 20;
+                int count = state->achievements.count;
+                contentHeight = 100 + (achievementHeight + achievementSpacing) * count;
+            }
+            int viewport = state->app.screenHeight - 100;
+            int maxOffset = (contentHeight > viewport) ? (contentHeight - viewport) : 0;
+            int next = state->menu.scrollOffset - SCROLL_STEP;
+            state->menu.scrollOffset = (next < 0) ? 0 : next;
+            if (state->menu.scrollOffset > maxOffset) state->menu.scrollOffset = maxOffset;
         }
     } else if (wheelY < 0) {
         // Scroll down / Next frame
@@ -54,9 +63,18 @@ static void processMouseWheel(GameState *state, int wheelY) {
             state->playerState.selectFrame += 1;
         }
         
-        // Menu scroll down
-        state->menu.scrollOffset = (state->menu.scrollOffset + SCROLL_STEP > MAX_SCROLL_OFFSET) ? 
-                                  MAX_SCROLL_OFFSET : state->menu.scrollOffset + SCROLL_STEP;
+        // Menu scroll down (dynamic clamp)
+        int contentHeight = 0;
+        if (state->menu.displayMenu == MENU_ACHIEVEMENTS) {
+            const int achievementHeight = 125;
+            const int achievementSpacing = 20;
+            int count = state->achievements.count;
+            contentHeight = 100 + (achievementHeight + achievementSpacing) * count;
+        }
+        int viewport = state->app.screenHeight - 100;
+        int maxOffset = (contentHeight > viewport) ? (contentHeight - viewport) : 0;
+        int next = state->menu.scrollOffset + SCROLL_STEP;
+        state->menu.scrollOffset = (next > maxOffset) ? maxOffset : next;
     }
 }
 

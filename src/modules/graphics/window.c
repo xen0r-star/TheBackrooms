@@ -242,6 +242,13 @@ int closeWindow(GameState *state) {
         state->entityState.zBuffer = NULL;
     }
 
+    // Free achievements memory
+    if (state->achievements.items) {
+        free(state->achievements.items);
+        state->achievements.items = NULL;
+        state->achievements.count = 0;
+    }
+
     // Close game controller if open
     if (state->app.controller != NULL) {
         SDL_GameControllerClose(state->app.controller);

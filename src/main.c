@@ -4,6 +4,7 @@
 #include "utils/utils.h"
 #include "core/core.h"
 #include "data/data.h"
+#include "data/achievements.h"
 #include "entities/entity.h"
 
 
@@ -14,7 +15,8 @@ GameState gameState = {
     .menu = {MENU_MAIN, BACKGROUND_MENU, 0},
     .mapState = {MAP_SIZE_LEVEL0, MAP_SIZE_LEVEL0, NULL, NULL, 0},
     .graphics = {NULL, NULL, NULL, {0}},
-    .settings = {0.2, 85.0, 1.0}
+    .settings = {0.2, 85.0, 1.0},
+    .achievements = {NULL, 0}
 };
 
 
@@ -55,6 +57,9 @@ int main(int argc, char *argv[]) {
         closeWindow(state);
         return 1;
     }
+
+    // Initialize achievements
+    achievements_init(state);
 
     // Initialize test entity with bread texture
     initializationEntity(&state->entityState, (Sprite){
@@ -133,6 +138,12 @@ int main(int argc, char *argv[]) {
             if (state->app.controller != NULL) {
                 controllerInput(state);
             }
+
+            // Update entity movement and simple AI
+            updateEntities(state);
+
+            // Update achievements progression
+            achievements_update(state);
 
             // Render main game scene
             renderScene(state);

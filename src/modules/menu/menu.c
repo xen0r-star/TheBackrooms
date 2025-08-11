@@ -1,4 +1,5 @@
 #include "menu.h"
+#include "../data/achievements.h"
 #include <math.h>
 
 #ifndef M_PI
@@ -75,14 +76,11 @@ void drawMenu(GameState *state) {
             break;
 
         case MENU_SETTINGS:
-            // Settings menu
+            // Settings menu (restored to original static state)
             background(state, state->menu.backgroundType);
-            
-            // TODO: Implement settings interface
             renderText(&state->app, CENTER, state->app.screenWidth / 2, 
                       state->app.screenHeight / 2, "Settings - Coming Soon", 
                       (Color){255, 255, 255, 255}, TEXT_L);
-            
             drawButton(&state->app, state->menu.returnButton, BUTTON_NORMAL);
             break;
 
@@ -144,51 +142,203 @@ static void updateSaveSlotText(GameState *state) {
 
 
 static void renderAchievementMenu(GameState *state, int mouseX, int mouseY) {
-    // Suppress unused parameter warnings for future mouse interaction features
-    (void)mouseX;
-    (void)mouseY;
-    
-    const int achievementCount = 10;  // TODO: Load from achievement system
+
+    const int achievementCount = state->achievements.count;
     const int achievementHeight = 125;
     const int achievementSpacing = 20;
     const int sideMargin = 60;
-    
-    // Render achievement entries
-    SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 225);
-    for (int i = 0; i < achievementCount; i++) {
-        SDL_Rect achievementRect = {
-            sideMargin, 
-            100 + (achievementHeight + achievementSpacing) * i - state->menu.scrollOffset, 
-            state->app.screenWidth - (sideMargin * 2), 
-            achievementHeight  
-        };
-        
-        // Only render visible achievements for performance
-        if (achievementRect.y + achievementRect.h >= 0 && 
-            achievementRect.y < state->app.screenHeight) {
+
+    // Layout constants
+    const int headerY = 20;
+    const int headerH = 50;
+    const int viewportTop = headerY + headerH + 10; // just under header
+    const int buttonTop = state->menu.returnButton.rect.y - state->menu.returnButton.rect.h / 2;
+    const int viewportBottom = buttonTop - 10;       // just above back button
+    int viewportHeight = viewportBottom - viewportTop;
+    if (viewportHeight < 10) viewportHeight = 10;    // safety
+
+    // Header bar (background of title section)
+    SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255);
+    SDL_Rect headerRect = {sideMargin, headerY, state->app.screenWidth - (sideMargin * 2), headerH};
+    SDL_RenderFillRect(state->app.renderer, &headerRect);
+    // Bottom divider line for header
+    SDL_SetRenderDrawColor(state->app.renderer, 80, 80, 80, 255);
+    SDL_RenderDrawLine(state->app.renderer, headerRect.x, headerRect.y + headerRect.h, 
+                       headerRect.x + headerRect.w, headerRect.y + headerRect.h);
+
+    // Title and totals
+    renderText(&state->app, LEFT, sideMargin + 60, headerY + headerH/2 + 5, 
+              "Achievements",
+              (Color){255, 255, 255, 255}, TEXT_S);
+    int unlocked = 0;
+    for (int i=0;i<achievementCount;i++) if (state->achievements.items[i].unlocked) unlocked++;
+    char totals[32];
+    snprintf(totals, sizeof(totals), "%d / %d", unlocked, achievementCount);
+    renderText(&state->app, RIGHT, state->app.screenWidth - sideMargin - 20, headerY + headerH/2 + 5, 
+              totals, (Color){255, 255, 255, 255}, TEXT_XS);
+
+    // Compute content and viewport rect; leave room for scrollbar (14px)
+    int viewportX = sideMargin;
+    int viewportW = state->app.screenWidth - (sideMargin * 2) - 14;
+    SDL_Rect clip = {viewportX, viewportTop, viewportW, viewportHeight};
+
+    // Clip rendering to viewport so cards don't draw over header or back button
+    SDL_RenderSetClipRect(state->app.renderer, &clip);
+
+    // Background for list area (semi-transparent)
+    SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255); // opaque clear to avoid ghosting
+    SDL_Rect viewportRect = {viewportX, viewportTop, viewportW, viewportHeight};
+    SDL_RenderFillRect(state->app.renderer, &viewportRect);
+
+    // Content height and base position
+    int contentHeight = (achievementHeight + achievementSpacing) * achievementCount;
+    int baseY = viewportTop;
+    int maxOffset = contentHeight > viewportHeight ? (contentHeight - viewportHeight) : 0;
+    if (state->menu.scrollOffset < 0) state->menu.scrollOffset = 0;
+    if (state->menu.scrollOffset > maxOffset) state->menu.scrollOffset = maxOffset;
+
+    // Compute visible index range to avoid overdraw
+    int step = achievementHeight + achievementSpacing;
+    int firstIndex = state->menu.scrollOffset / step;
+    if (firstIndex > 0) firstIndex -= 1; // render one above for partials
+    if (firstIndex < 0) firstIndex = 0;
+    int lastIndex = (state->menu.scrollOffset + viewportHeight) / step + 1;
+    if (lastIndex >= achievementCount) lastIndex = achievementCount - 1;
+
+    // Render achievement cards within clipped area
+    for (int i = firstIndex; i <= lastIndex; i++) {
+    int cardY = baseY + (achievementHeight + achievementSpacing) * i - state->menu.scrollOffset;
+    int visualCardAdjust = 3; // move card slightly up
+    SDL_Rect achievementRect = { viewportX, cardY - visualCardAdjust, viewportW, achievementHeight };
+
+        // Only render if intersects viewport
+        if (achievementRect.y + achievementRect.h > viewportTop && achievementRect.y < viewportBottom) {
+            // Hover detection
+            bool hovered = (mouseX >= achievementRect.x && mouseX <= achievementRect.x + achievementRect.w &&
+                            mouseY >= achievementRect.y && mouseY <= achievementRect.y + achievementRect.h);
+
+            // Card shadow
+            SDL_Rect shadow = {achievementRect.x + 3, achievementRect.y + 3, achievementRect.w, achievementRect.h};
+            SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 90);
+            SDL_RenderFillRect(state->app.renderer, &shadow);
+
+            // Card background
+            Uint8 baseR = hovered ? 30 : 20;
+            Uint8 baseG = hovered ? 30 : 20;
+            Uint8 baseB = hovered ? 30 : 20;
+            SDL_SetRenderDrawColor(state->app.renderer, baseR, baseG, baseB, 255);
             SDL_RenderFillRect(state->app.renderer, &achievementRect);
-            
-            // TODO: Render achievement icon, title, description, and progress
+
+            // Accent band at top of card
+            SDL_Rect band = {achievementRect.x, achievementRect.y, achievementRect.w, 28};
+            Achievement *a = &state->achievements.items[i];
+            Uint8 bandR = a->unlocked ? 60 : 100;
+            Uint8 bandG = a->unlocked ? 160 : 110;
+            Uint8 bandB = a->unlocked ? 60 : 40;
+            SDL_SetRenderDrawColor(state->app.renderer, bandR, bandG, bandB, 255);
+            SDL_RenderFillRect(state->app.renderer, &band);
+
+            // Card border
+            SDL_SetRenderDrawColor(state->app.renderer, hovered ? 180 : 100, hovered ? 180 : 100, hovered ? 180 : 100, 255);
+            SDL_RenderDrawRect(state->app.renderer, &achievementRect);
+
+            // Badge placeholder
+            SDL_SetRenderDrawColor(state->app.renderer, a->unlocked ? 60 : 30, a->unlocked ? 160 : 30, 60, 255);
+            SDL_Rect badge = {achievementRect.x + 15, achievementRect.y + 15, 95, 95};
+            SDL_RenderFillRect(state->app.renderer, &badge);
+            // Badge border
+            SDL_SetRenderDrawColor(state->app.renderer, 200, 200, 200, 255);
+            SDL_RenderDrawRect(state->app.renderer, &badge);
+
+            // If locked, draw a simple padlock overlay on badge
+            if (!a->unlocked) {
+                SDL_SetRenderDrawColor(state->app.renderer, 200, 200, 200, 255);
+                SDL_Rect lockBody = {badge.x + 30, badge.y + 48, 36, 28};
+                SDL_RenderFillRect(state->app.renderer, &lockBody);
+                // Keyhole
+                SDL_SetRenderDrawColor(state->app.renderer, 50, 50, 50, 255);
+                SDL_Rect keyhole = {lockBody.x + lockBody.w/2 - 3, lockBody.y + 8, 6, 10};
+                SDL_RenderFillRect(state->app.renderer, &keyhole);
+                // Shackle
+                SDL_SetRenderDrawColor(state->app.renderer, 200, 200, 200, 255);
+                SDL_Rect shackle = {lockBody.x - 6, lockBody.y - 12, lockBody.w + 12, 10};
+                SDL_RenderFillRect(state->app.renderer, &shackle);
+            }
+
+            // Title and description (aligned to band and consistent baseline)
+            int titleY = band.y + band.h / 2 + 2;                // slightly lower inside band
+            int descY  = band.y + band.h + 26;                   // slightly lower baseline below band
+            renderText(&state->app, LEFT, achievementRect.x + 130, titleY,
+                       a->title, (Color){255,255,255,255}, TEXT_M);
+            renderText(&state->app, LEFT, achievementRect.x + 130, descY,
+                       a->desc, (Color){200,200,200,255}, TEXT_S);
+
+            // Progress or unlocked label
+            char buf[64];
+            if (a->unlocked) {
+                snprintf(buf, sizeof(buf), "Unlocked");
+            } else if (a->target > 0) {
+                snprintf(buf, sizeof(buf), "%d / %d", a->progress, a->target);
+            } else {
+                snprintf(buf, sizeof(buf), "Locked");
+            }
+            renderText(&state->app, RIGHT, achievementRect.x + achievementRect.w - 20, descY,
+                       buf, (Color){255,255,255,255}, TEXT_S);
+
+            // Progress bar
+            float ratio = 0.0f;
+            if (a->target > 0) ratio = (float)a->progress / (float)a->target;
+            else ratio = a->unlocked ? 1.0f : 0.0f;
+            if (ratio < 0.0f) {
+                ratio = 0.0f;
+            }
+            if (ratio > 1.0f) {
+                ratio = 1.0f;
+            }
+            int barX = achievementRect.x + 130;
+            int barW = achievementRect.w - 150;
+            int barY = achievementRect.y + achievementRect.h - 18;
+            int barH = 10;
+            // background
+            SDL_SetRenderDrawColor(state->app.renderer, 40, 40, 40, 255);
+            SDL_Rect barBg = {barX, barY, barW, barH};
+            SDL_RenderFillRect(state->app.renderer, &barBg);
+            // fill (gradient-ish by lerp red->green)
+            int fr = (int)(180 * (1.0f - ratio) + 60 * ratio);
+            int fg = (int)(70 * (1.0f - ratio) + 160 * ratio);
+            int fb = (int)(60 * (1.0f - ratio) + 60 * ratio);
+            SDL_SetRenderDrawColor(state->app.renderer, fr, fg, fb, 255);
+            SDL_Rect barFill = {barX, barY, (int)(barW * ratio), barH};
+            SDL_RenderFillRect(state->app.renderer, &barFill);
         }
     }
 
-    // Render header bar
-    SDL_SetRenderDrawColor(state->app.renderer, 0, 0, 0, 255);
-    SDL_Rect headerRect = {sideMargin, 20, state->app.screenWidth - (sideMargin * 2), 50};
-    SDL_RenderFillRect(state->app.renderer, &headerRect);
+    // Remove clip
+    SDL_RenderSetClipRect(state->app.renderer, NULL);
 
-    // Header text
-    renderText(&state->app, LEFT, sideMargin + 60, 45, 
-              "Achievements",  // TODO: Localize - was "Succes"
-              (Color){255, 255, 255, 255}, TEXT_S);
-    renderText(&state->app, RIGHT, state->app.screenWidth - sideMargin - 20, 45, 
-              "0 / 25",  // TODO: Load from achievement system
-              (Color){255, 255, 255, 255}, TEXT_XS);
-    
-    // Return button
+    // Return button (drawn outside clipped area)
     drawButton(&state->app, state->menu.returnButton, BUTTON_NORMAL);
-    
-    // TODO: Implement scrollbar rendering and mouse wheel handling
+
+    // Scrollbar in the reserved lane (with track)
+    if (contentHeight > viewportHeight) {
+        // Track
+        int trackX = state->app.screenWidth - sideMargin - 12;
+        SDL_SetRenderDrawColor(state->app.renderer, 30, 30, 30, 200);
+        SDL_Rect track = {trackX, viewportTop, 10, viewportHeight};
+        SDL_RenderFillRect(state->app.renderer, &track);
+
+        float ratio = (float)viewportHeight / (float)contentHeight;
+        int barH = (int)(ratio * viewportHeight);
+        if (barH < 20) barH = 20;
+        float scrollRatio = (maxOffset > 0) ? (float)state->menu.scrollOffset / (float)maxOffset : 0.0f;
+        int trackY = viewportTop;
+        int trackH = viewportHeight;
+        int barY = trackY + (int)(scrollRatio * (trackH - barH));
+        int barX = trackX + 2; // inset
+        SDL_SetRenderDrawColor(state->app.renderer, 120, 120, 120, 230);
+        SDL_Rect bar = {barX, barY, 6, barH};
+        SDL_RenderFillRect(state->app.renderer, &bar);
+    }
 }
 
 
